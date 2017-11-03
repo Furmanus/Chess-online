@@ -1,0 +1,54 @@
+html, body{
+
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    min-height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+body{
+
+    background-color: #E4DBBF;
+
+}
+.header{
+
+    height: 10%;
+    border-bottom: 1px solid black;
+}
+.main{
+
+    height: 80%;
+    border-bottom: 1px solid black;
+}
+.footer{
+
+    height: 10%;
+}
+.main-board{
+
+    position: absolute;
+    top: 10%;
+    width: 70%;
+    height: 80%;
+}
+.main-side{
+
+    position: absolute;
+    top: 10%;
+    left: 70%;
+    width: 30%;
+    height: 80%;
+    border-left: 1px solid black;
+}
+#board{
+
+    position: absolute;
+    width: 424px;
+    height: 424px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+}

@@ -1,0 +1,39 @@
+.cell{
+
+    position: absolute;
+    width: 53px;
+    height: 53px;
+}
+/*
+.cell:hover{
+
+    box-shadow: 0 0 0 3px darkgreen inset;
+}
+*/
+.cell_white{
+
+    background: blanchedalmond;
+}
+
+.cell_black{
+
+    background: darkgoldenrod;
+}
+
+.border_bottom{
+
+    border-bottom: 1px solid black;
+}
+
+.border_right{
+
+    border-right: 1px solid black;
+}
+.red_border{
+
+    box-shadow: 0 0 0 3px red inset;
+}
+.blue_border{
+
+    box-shadow: 0 0 0 3px blue inset;
+}
