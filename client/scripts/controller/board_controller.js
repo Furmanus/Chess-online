@@ -5,6 +5,7 @@ import Ajax from "../helper/ajax";
 
 // declaration of private variables
 const boardView = Symbol();
+const socketClientManager = Symbol();
 
 /**
  * Controller responsible for taking user input from game board, passing it to model and manipulating view.
@@ -15,15 +16,22 @@ class BoardController{
 
     /**
      * Constructor for board controller.
-     * @param {BoardView} boardViewObject
+     * @param {BoardView}           boardViewObject
+     * @param {SocketClientManager} socketClientManagerInstance
      */
-    constructor(boardViewObject){
+    constructor(boardViewObject, socketClientManagerInstance){
 
         /**
          * @type {BoardView}
          * @private
          */
         this[boardView] = boardViewObject;
+
+        /**
+         * @type {SocketClientManager}
+         * @private
+         */
+        this[socketClientManager] = socketClientManagerInstance;
 
         this.attachEventListeners();
     }

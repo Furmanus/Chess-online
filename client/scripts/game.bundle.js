@@ -145,8 +145,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
 
-    io = io();
-
     window.front = {
 
         controller: new _controller2.default()
@@ -178,6 +176,10 @@ var _view = __webpack_require__(8);
 
 var _view2 = _interopRequireDefault(_view);
 
+var _socket_manager = __webpack_require__(14);
+
+var _socket_manager2 = _interopRequireDefault(_socket_manager);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -186,6 +188,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var mainView = Symbol();
 var boardController = Symbol();
 var panelController = Symbol();
+var socketClientManager = Symbol();
 
 /**
  * Main controller of application.
@@ -208,16 +211,22 @@ var MainController = function () {
     this[mainView] = new _view2.default();
 
     /**
+     * @type {SocketClientManager}
+     * @private
+     */
+    this[socketClientManager] = new _socket_manager2.default();
+
+    /**
      * @type {BoardController}
      * @private
      */
-    this[boardController] = new _board_controller2.default(this.getMainView().getBoardView());
+    this[boardController] = new _board_controller2.default(this.getMainView().getBoardView(), this.getSocketClientManager());
 
     /**
      * @type {PanelController}
      * @private
      */
-    this[panelController] = new _panel_controller2.default(this.getMainView().getPanelView());
+    this[panelController] = new _panel_controller2.default(this.getMainView().getPanelView(), this.getSocketClientManager());
   }
 
   /**
@@ -243,6 +252,18 @@ var MainController = function () {
     value: function getPanelController() {
 
       return this[panelController];
+    }
+
+    /**
+     * Returns socket manager for client side.
+     * @returns {SocketClientManager}   SocketClientManager instance.
+     */
+
+  }, {
+    key: "getSocketClientManager",
+    value: function getSocketClientManager() {
+
+      return this[socketClientManager];
     }
 
     /**
@@ -290,6 +311,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 // declaration of private variables
 var boardView = Symbol();
+var socketClientManager = Symbol();
 
 /**
  * Controller responsible for taking user input from game board, passing it to model and manipulating view.
@@ -301,9 +323,10 @@ var BoardController = function () {
 
     /**
      * Constructor for board controller.
-     * @param {BoardView} boardViewObject
+     * @param {BoardView}           boardViewObject
+     * @param {SocketClientManager} socketClientManagerInstance
      */
-    function BoardController(boardViewObject) {
+    function BoardController(boardViewObject, socketClientManagerInstance) {
         _classCallCheck(this, BoardController);
 
         /**
@@ -311,6 +334,12 @@ var BoardController = function () {
          * @private
          */
         this[boardView] = boardViewObject;
+
+        /**
+         * @type {SocketClientManager}
+         * @private
+         */
+        this[socketClientManager] = socketClientManagerInstance;
 
         this.attachEventListeners();
     }
@@ -582,6 +611,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 //private variables declaration
 var panelView = Symbol();
+var socketClientManager = Symbol();
 
 /**
  * Controller responsible for taking user input from panel, passing it to model and manipulating view.
@@ -593,12 +623,15 @@ var PanelController = function () {
 
     /**
      * Constructor for panel controller.
-     * @param {PanelView} panelViewObject
+     * @param {PanelView}           panelViewObject
+     * @param {SocketClientManager} socketClientManagerInstance
      */
-    function PanelController(panelViewObject) {
+    function PanelController(panelViewObject, socketClientManagerInstance) {
         _classCallCheck(this, PanelController);
 
         this[panelView] = panelViewObject;
+
+        this[socketClientManager] = socketClientManagerInstance;
     }
 
     /**
@@ -612,6 +645,18 @@ var PanelController = function () {
         value: function getPanelView() {
 
             return this[panelView];
+        }
+
+        /**
+         * Returns socket manager for client side.
+         * @returns {SocketClientManager}
+         */
+
+    }, {
+        key: "getSocketClientManager",
+        value: function getSocketClientManager() {
+
+            return this[socketClientManager];
         }
     }]);
 
@@ -1459,6 +1504,60 @@ var Utility = {
 };
 
 exports.default = Utility;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * @author Lukasz Lach
+ */
+
+var socket = Symbol();
+
+/**
+ * Class responsible for managing socket connection from client side.
+ * @class
+ * @typedef {Object}    SocketClientManager
+ */
+
+var SocketClientManager = function () {
+
+  /**
+   * @constructor
+   */
+  function SocketClientManager() {
+    _classCallCheck(this, SocketClientManager);
+
+    this[socket] = undefined;
+
+    this.initialize();
+  }
+
+  /**
+   * Method responsible for initializing SocketClientManager class. Creates new socket connected to server.
+   */
+
+
+  _createClass(SocketClientManager, [{
+    key: "initialize",
+    value: function initialize() {
+
+      this[socket] = io();
+    }
+  }]);
+
+  return SocketClientManager;
+}();
+
+module.exports = SocketClientManager;
 
 /***/ })
 /******/ ]);
