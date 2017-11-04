@@ -145,6 +145,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (function () {
 
+    io = io();
+
     window.front = {
 
         controller: new _controller2.default()
@@ -311,11 +313,6 @@ var BoardController = function () {
         this[boardView] = boardViewObject;
 
         this.attachEventListeners();
-
-        _ajax2.default.post('/test', { a: 1, b: 2, c: [1, 2, 3], d: { dupa: 1, dupsko: 2 } }, function (data) {
-
-            console.log(data);
-        }, true);
     }
 
     /**
@@ -450,6 +447,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 /**
+ * TODO poprawić aby obsługiwało zagnieżdżone obiekty.
  * Method which converts object into url like query (example: {a: 1, b: 2} -> 'a=1&b=2'). Works only with object with values of primitive types.
  * @param   {Object}    object  Object to convert.
  * @returns {string}    String containing converted data.
@@ -507,7 +505,7 @@ var Ajax = function () {
          * @param   {string}    url             URL adress where data should be send.
          * @param   {Object}    data            Data object to send.
          * @param   {function}  callback        Callback function executed upon successful response.
-         * @param   {boolean}   isJsonRequest   Parameter determining whether requests content-type should be 'application/json'. If set to false, it will be 'application/x-www-form-urlencoded'.
+         * @param   {boolean}   isJsonRequest   Parameter determining whether requests content-type should be 'application/json'. If set to false, it will be 'application/x-www-form-urlencoded'. By default set to true.
          */
         value: function post(url, data, callback) {
             var isJsonRequest = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
