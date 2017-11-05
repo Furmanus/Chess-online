@@ -2,7 +2,9 @@
  * @author Lukasz Lach
  */
 
+//private variables declaration
 const socket = Symbol();
+let instance;
 
 /**
  * Class responsible for managing socket connection from client side.
@@ -16,9 +18,25 @@ class SocketClientManager{
      */
     constructor(){
 
-        this[socket] = undefined;
+        if(!instance){
 
-        this.initialize();
+            instance = this;
+
+            this[socket] = undefined;
+            this.initialize();
+        }
+
+        return instance;
+    }
+
+    /**
+     * Method responsible for making socket listen to certain event.
+     * @param   {string}    event       Event on which socket should listen.
+     * @param   {function}  callback    Callback function triggered upon event emition.
+     */
+    listenOnEvent(event, callback){
+
+        this.getSocketIo().on(event, callback);
     }
 
     /**

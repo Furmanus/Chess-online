@@ -1520,7 +1520,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * @author Lukasz Lach
  */
 
+//private variables declaration
 var socket = Symbol();
+var instance = void 0;
 
 /**
  * Class responsible for managing socket connection from client side.
@@ -1530,31 +1532,50 @@ var socket = Symbol();
 
 var SocketClientManager = function () {
 
-  /**
-   * @constructor
-   */
-  function SocketClientManager() {
-    _classCallCheck(this, SocketClientManager);
+    /**
+     * @constructor
+     */
+    function SocketClientManager() {
+        _classCallCheck(this, SocketClientManager);
 
-    this[socket] = undefined;
+        if (!instance) {
 
-    this.initialize();
-  }
+            instance = this;
 
-  /**
-   * Method responsible for initializing SocketClientManager class. Creates new socket connected to server.
-   */
+            this[socket] = undefined;
+            this.initialize();
+        }
 
-
-  _createClass(SocketClientManager, [{
-    key: "initialize",
-    value: function initialize() {
-
-      this[socket] = io();
+        return instance;
     }
-  }]);
 
-  return SocketClientManager;
+    /**
+     * Method responsible for making socket listen to certain event.
+     * @param   {string}    event       Event on which socket should listen.
+     * @param   {function}  callback    Callback function triggered upon event emition.
+     */
+
+
+    _createClass(SocketClientManager, [{
+        key: "listenOnEvent",
+        value: function listenOnEvent(event, callback) {
+
+            this.getSocketIo().on(event, callback);
+        }
+
+        /**
+         * Method responsible for initializing SocketClientManager class. Creates new socket connected to server.
+         */
+
+    }, {
+        key: "initialize",
+        value: function initialize() {
+
+            this[socket] = io();
+        }
+    }]);
+
+    return SocketClientManager;
 }();
 
 module.exports = SocketClientManager;
