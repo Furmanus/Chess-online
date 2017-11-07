@@ -1,2 +1,3 @@
 .idea
 node_modules
+client/scripts/game.bundle.js
