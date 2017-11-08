@@ -4,6 +4,7 @@ import BoardController from "./board_controller";
 import PanelController from "./panel_controller";
 import View from "../view/view";
 import SocketClientManager from "../helper/socket_manager";
+import Observer from "../core/observer";
 
 // declarations of class private fields
 const mainView = Symbol();
@@ -16,12 +17,14 @@ const socketClientManager = Symbol();
  * @class
  * @typedef {Object} MainController
  */
-class MainController{
+class MainController extends Observer{
 
     /**
      * Constructor of main controller
      */
     constructor(){
+
+        super();
 
         /**
          * @type {View}

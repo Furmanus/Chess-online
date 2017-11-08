@@ -1,4 +1,5 @@
 /**@author Lukasz Lach*/
+import Observer from "../core/observer";
 
 //private variables declaration
 const panelView = Symbol();
@@ -9,7 +10,7 @@ const socketClientManager = Symbol();
  * @class
  * @typedef {Object} PanelController
  */
-class PanelController{
+class PanelController extends Observer{
 
     /**
      * Constructor for panel controller.
@@ -18,8 +19,9 @@ class PanelController{
      */
     constructor(panelViewObject, socketClientManagerInstance){
 
-        this[panelView] = panelViewObject;
+        super();
 
+        this[panelView] = panelViewObject;
         this[socketClientManager] = socketClientManagerInstance;
     }
 

@@ -2,6 +2,8 @@
 
 import HighlightEnums from "../enums/highlight";
 import Ajax from "../helper/ajax";
+import Observer from "../core/observer";
+import EventEnums from "../enums/events";
 
 // declaration of private variables
 const boardView = Symbol();
@@ -12,7 +14,7 @@ const socketClientManager = Symbol();
  * @class
  * @typedef {Object}    BoardController
  */
-class BoardController{
+class BoardController extends Observer{
 
     /**
      * Constructor for board controller.
@@ -20,6 +22,8 @@ class BoardController{
      * @param {SocketClientManager} socketClientManagerInstance
      */
     constructor(boardViewObject, socketClientManagerInstance){
+
+        super();
 
         /**
          * @type {BoardView}
@@ -37,45 +41,33 @@ class BoardController{
     }
 
     /**
-     * Method responsible for attaching event listeners to various game board HTML elements.
+     * Method responsible for attaching event listeners.
      * @returns {undefined}
      */
     attachEventListeners(){
 
-        this.attachClickEventListeners();
+        this.listenToViewEvents();
     }
 
     /**
-     * Method responsible for attaching click event listeners to cells HTML elements.
+     * Method responsible for listening on board view for particular events.
      * @returns {undefined}
      */
-    attachClickEventListeners(){
+    listenToViewEvents(){
 
-        const cellsMap = Array.from(this.getBoardView().getCells().values()); //we transform map to array;
-
-        for(let cell of cellsMap){
-
-            cell.getElement().addEventListener('click', this.clickEventListener.bind(this));
-        }
+        this.getBoardView().on(this, EventEnums.BOARD_CLICK, this.onBoardCellClick.bind(this));
     }
 
     /**
      *  //TODO pobranie elementu zrobione, dokończyć resztę po zrobieniu modelu
-     * @param {Event}   ev                                      Event object which triggered this function.
-     * @param {string}  ev.currentTarget.dataset.coordinates    String containing coordinates of chosen cell, stored in 'data-coordinates' HTML element attribute.
+     * @param   {Object}    data    Object containing coordinates of chosen cell.
+     * @param   {number}    data.x  Row(horizontal) coordinate of chosen cell.
+     * @param   {number}    data.y  Column(vertical) coordinate of chosen cell.
      */
-    clickEventListener(ev){
+    onBoardCellClick(data){
 
-        const targetCoordinates = this.convertStringCoordinatesToObject(ev.currentTarget.dataset.coordinates);
-        const targetCell = this.getBoardView().getCell(targetCoordinates.x, targetCoordinates.y);
-
-        if (!targetCell.isHighlighted) {
-
-            targetCell.highlightCell(HighlightEnums.RED);
-        } else {
-
-            targetCell.removeHighlightCell();
-        }
+        //TODO wysłać dane do servera i po odpowiedzi zaktualizować widok
+        //this.getBoardView().toogleCellHighlight(data.x, data.y);
     }
 
     /**
@@ -85,24 +77,6 @@ class BoardController{
     getBoardView(){
 
         return this[boardView];
-    }
-
-    /**
-     * Method which converts string with coordinates into object with 'x' and 'y' properties.
-     * @param   {string}                    String with cell coordinates. Example '2x1'.
-     * @returns {{x: number, y: number}}    Object with cell coordinates.
-     */
-    convertStringCoordinatesToObject(string){
-
-        if(string.length !== 3){
-
-            throw new Error('Invalid string coordinates type.');
-        }
-
-        const x = parseInt(string.charAt(0));
-        const y = parseInt(string.charAt(2));
-
-        return {x: x, y: y};
     }
 }
 

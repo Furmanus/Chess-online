@@ -5,6 +5,7 @@
 
 import PanelView from "./panel/panel_view";
 import BoardView from "./board/board_view";
+import Observer from "../core/observer";
 
 // private variables declaration
 const boardView = Symbol('boardView');
@@ -15,13 +16,15 @@ const panelView = Symbol('panelView');
  * @class
  * @typedef {Object} View
  */
-class View{
+class View extends Observer{
 
     /**
      * Constuctor for main view object.
      * @constructor
      */
     constructor(){
+
+        super();
 
         /**
          * @private
