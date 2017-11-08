@@ -4,7 +4,10 @@
   "description": "Online chess game",
   "main": "entry.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm-run-all --parallel watch:server watch:build",
+    "watch:server": "nodemon entry.js",
+    "watch:build": "webpack --watch"
   },
   "author": "Łukasz Lach",
   "license": "ISC",
@@ -16,6 +19,7 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.16.2",
     "express-session": "^1.15.6",
+    "socket.io": "^2.0.4",
     "webpack": "^3.6.0"
   }
 }

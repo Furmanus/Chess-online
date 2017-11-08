@@ -3,23 +3,28 @@
 import BoardController from "./board_controller";
 import PanelController from "./panel_controller";
 import View from "../view/view";
+import SocketClientManager from "../helper/socket_manager";
+import Observer from "../core/observer";
 
 // declarations of class private fields
 const mainView = Symbol();
 const boardController = Symbol();
 const panelController = Symbol();
+const socketClientManager = Symbol();
 
 /**
  * Main controller of application.
  * @class
  * @typedef {Object} MainController
  */
-class MainController{
+class MainController extends Observer{
 
     /**
      * Constructor of main controller
      */
     constructor(){
+
+        super();
 
         /**
          * @type {View}
@@ -28,16 +33,23 @@ class MainController{
         this[mainView] = new View();
 
         /**
+         * @type {SocketClientManager}
+         * @private
+         */
+        this[socketClientManager] = new SocketClientManager();
+
+        /**
          * @type {BoardController}
          * @private
          */
-        this[boardController] = new BoardController(this.getMainView().getBoardView());
+        this[boardController] = new BoardController(this.getMainView().getBoardView(), this.getSocketClientManager());
 
         /**
          * @type {PanelController}
          * @private
          */
-        this[panelController] = new PanelController(this.getMainView().getPanelView());
+        this[panelController] = new PanelController(this.getMainView().getPanelView(), this.getSocketClientManager());
+
     }
 
     /**
@@ -56,6 +68,15 @@ class MainController{
     getPanelController(){
 
         return this[panelController];
+    }
+
+    /**
+     * Returns socket manager for client side.
+     * @returns {SocketClientManager}   SocketClientManager instance.
+     */
+    getSocketClientManager(){
+
+        return this[socketClientManager];
     }
 
     /**
