@@ -2,11 +2,11 @@
 
 import Cell from "./cell";
 import Figure from "./figure";
-import FigureEnums from "../../enums/figures";
-import ColourEnums from "../../enums/colours";
-import HighlightEnums from "../../enums/highlight";
-import Observer from "../../core/observer";
-import EventEnums from "../../enums/events";
+import FigureEnums from "../../../../enums/figures";
+import ColourEnums from "../../../../enums/colours";
+import HighlightEnums from "../../../../enums/highlight";
+import Observer from "../../../../core/observer";
+import EventEnums from "../../../../enums/events";
 
 // private variables declaration
 const gameBoard = Symbol('gameBoard');

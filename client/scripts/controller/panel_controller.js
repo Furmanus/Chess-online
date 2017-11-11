@@ -1,5 +1,5 @@
 /**@author Lukasz Lach*/
-import Observer from "../core/observer";
+import Observer from "../../../core/observer";
 
 //private variables declaration
 const panelView = Symbol();

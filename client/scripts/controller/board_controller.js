@@ -1,9 +1,9 @@
 /**@author Lukasz Lach*/
 
-import HighlightEnums from "../enums/highlight";
+import HighlightEnums from "../../../enums/highlight";
 import Ajax from "../helper/ajax";
-import Observer from "../core/observer";
-import EventEnums from "../enums/events";
+import Observer from "../../../core/observer";
+import EventEnums from "../../../enums/events";
 
 // declaration of private variables
 const boardView = Symbol();

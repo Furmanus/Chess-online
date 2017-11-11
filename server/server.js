@@ -109,7 +109,7 @@ class Server{
 
     /**
      * Returns socket connection.
-     * @returns {Object}
+     * @returns {SocketManager}
      */
     getSocketManager(){
 

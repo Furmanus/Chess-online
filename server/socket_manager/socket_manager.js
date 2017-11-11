@@ -1,8 +1,10 @@
 /**
  * @author Lukasz Lach
  */
+const Client = require('./../models/connected_client');
 
 const socketIo = Symbol();
+const clients = Symbol();
 
 /**
  * Class responsible for managing sockets from server side.
@@ -20,19 +22,28 @@ class SocketManager{
     constructor(server, socket){
 
         this[socketIo] = socket(server);
+        this[clients] = new Map();
 
         this.initialize();
     }
 
     /**
-     * Initializes work of SockerManager by listening on 'connection' event.
+     * Initializes work of SockerManager.
      */
     initialize(){
 
+        this.attachEventListeners();
+    }
+
+    /**
+     * Method responsible for attaching event handlers to some default events like 'connection', 'error', 'disconnection'
+     */
+    attachEventListeners(){
+
         this.getSocketIo().on('connection', function(socket){
 
-            console.log('User connected');
-        });
+            this.getClients().set(socket.id, new Client(socket, null));
+        }.bind(this));
     }
 
     /**
@@ -52,6 +63,15 @@ class SocketManager{
     getSocketIo(){
 
         return this[socketIo];
+    }
+
+    /**
+     * Returns Map object with connected sockets (key in map is equal to socket ID, values are data like socket, etc.)
+     * @returns {Map}
+     */
+    getClients(){
+
+        return this[clients];
     }
 }
 

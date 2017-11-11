@@ -40,11 +40,21 @@ class SocketClientManager{
     }
 
     /**
+     * Callback function after successful socket connection to server.
+     */
+    onSocketConnection(){
+
+        console.log(this[socket].id);
+    }
+
+    /**
      * Method responsible for initializing SocketClientManager class. Creates new socket connected to server.
      */
     initialize(){
 
         this[socket] = io();
+
+        this[socket].on('connect', this.onSocketConnection.bind(this));
     }
 }
 

@@ -1,6 +1,6 @@
 /**@author Lukasz Lach*/
 
-import HighlightEnums from "../../enums/highlight";
+import HighlightEnums from "../../../../enums/highlight";
 
 //private variables of Cell class
 const parent = Symbol('parent');
