@@ -1,7 +1,7 @@
 /**@author Lukasz Lach*/
 
-import FigureEnums from './../../enums/figures';
-import ColourEnums from "../../enums/colours";
+import FigureEnums from '../../../../enums/figures';
+import ColourEnums from "../../../../enums/colours";
 import Utility from "../../helper/algorithms";
 
 // private variables declaration

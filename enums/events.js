@@ -8,4 +8,4 @@ let EventEnums = {
     BOARD_CLICK: 'board:click'
 };
 
-export default EventEnums;
+module.exports = EventEnums;

@@ -11,4 +11,4 @@ let FigureEnums = {
     KING: 'king'
 };
 
-export default FigureEnums;
+module.exports = FigureEnums;

@@ -5,7 +5,7 @@
 
 import PanelView from "./panel/panel_view";
 import BoardView from "./board/board_view";
-import Observer from "../core/observer";
+import Observer from "../../../core/observer";
 
 // private variables declaration
 const boardView = Symbol('boardView');

@@ -68,4 +68,4 @@ class Observer{
     }
 }
 
-export default Observer;
+module.exports = Observer;

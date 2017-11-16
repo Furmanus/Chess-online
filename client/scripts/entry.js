@@ -1,5 +1,5 @@
 import MainController from "./controller/controller";
-import Observer from "./core/observer";
+import Observer from "../../core/observer";
 
 (function(){
 

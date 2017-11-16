@@ -4,7 +4,7 @@ import BoardController from "./board_controller";
 import PanelController from "./panel_controller";
 import View from "../view/view";
 import SocketClientManager from "../helper/socket_manager";
-import Observer from "../core/observer";
+import Observer from "../../../core/observer";
 
 // declarations of class private fields
 const mainView = Symbol();
