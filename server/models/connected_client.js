@@ -2,6 +2,8 @@
  * @author Lukasz Lach
  */
 
+const Observer = require('./../../core/observer');
+
 const connectedClientData = Symbol();
 const socket = Symbol();
 
@@ -9,7 +11,7 @@ const socket = Symbol();
  * @class
  * @typedef {Object}    Client
  */
-class Client{
+class Client extends Observer{
 
     /**
      * @constructor
@@ -18,6 +20,7 @@ class Client{
      */
     constructor(socketObject, data = {}){
 
+        super();
         /**
          * @type {Object}
          */

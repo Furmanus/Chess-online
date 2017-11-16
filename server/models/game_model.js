@@ -2,24 +2,23 @@
  * @author Lukasz Lach
  */
 
-const GameBoardModel = require('gameboard_model');
+const Observer = require('./../../core/observer');
 
 //private variables declaration
 const players = Symbol();
 const activePlayer = Symbol();
 const gameBoard = Symbol();
-
 /**
  * @class
  * @typedef {Object} GameModel
  */
-class GameModel{
-
+class GameModel extends Observer{
     /**
      * @constructor
      */
     constructor(){
 
+        super();
         /**
          * @private
          * @type {{white: {string|null}, black: {string|null}}
@@ -34,11 +33,22 @@ class GameModel{
          * @type {string|undefined}
          */
         this[activePlayer] = undefined;
-        /**
-         * @private
-         * @type {GameBoardModel}
-         */
-        this[gameBoard] = new GameBoardModel();
+    }
+    /**
+     * Sets active player.
+     * @param {string|undefined} playerColour
+     */
+    setActivePlayer(playerColour){
+
+        this[activePlayer] = playerColour;
+    }
+    /**
+     * Returns active player colour.
+     * @returns {string|undefined}
+     */
+    getActivePlayer(){
+
+        return this[activePlayer];
     }
 }
 

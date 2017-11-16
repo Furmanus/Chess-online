@@ -37,7 +37,7 @@ class Server{
     }
 
     /**
-     * Initializes server.
+     * Initializes routes.
      */
     initialize(){
 
@@ -53,7 +53,7 @@ class Server{
     }
 
     /**
-     * Method which makes server use various middleware functions and sets server variables.
+     * Method which makes routes use various middleware functions and sets routes variables.
      */
     initializeExpressApplication(){
 
@@ -77,7 +77,7 @@ class Server{
     }
 
     /**
-     * Method responsible for running server.
+     * Method responsible for running routes.
      */
     startListening(){
 
@@ -90,7 +90,7 @@ class Server{
     }
 
     /**
-     * Returns http server instance.
+     * Returns http routes instance.
      * @returns {Object}
      */
     getServer(){

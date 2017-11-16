@@ -40,7 +40,7 @@ class SocketClientManager{
     }
 
     /**
-     * Callback function after successful socket connection to server.
+     * Callback function after successful socket connection to routes.
      */
     onSocketConnection(){
 
@@ -48,7 +48,7 @@ class SocketClientManager{
     }
 
     /**
-     * Method responsible for initializing SocketClientManager class. Creates new socket connected to server.
+     * Method responsible for initializing SocketClientManager class. Creates new socket connected to routes.
      */
     initialize(){
 

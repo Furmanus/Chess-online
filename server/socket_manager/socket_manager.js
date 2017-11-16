@@ -7,16 +7,16 @@ const socketIo = Symbol();
 const clients = Symbol();
 
 /**
- * Class responsible for managing sockets from server side.
+ * Class responsible for managing sockets from routes side.
  * @class
  * @typedef {Object}    SocketManager
  */
 class SocketManager{
 
     /**
-     * Constructor for SockerManager class. Creates instance of socket.io object attached to http server.
+     * Constructor for SockerManager class. Creates instance of socket.io object attached to http routes.
      * @constructor
-     * @param   {Object}    server  Instance of http server (taken from 'require('http').Server(app), where app is express object instance).
+     * @param   {Object}    server  Instance of http routes (taken from 'require('http').Server(app), where app is express object instance).
      * @param   {Object}    socket  Instance of socketIo object (taken from 'require('socket.io').
      */
     constructor(server, socket){
@@ -57,7 +57,7 @@ class SocketManager{
     }
 
     /**
-     * Returns instance of socket.io object attached to http server.
+     * Returns instance of socket.io object attached to http routes.
      * @returns {Object}
      */
     getSocketIo(){

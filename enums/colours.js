@@ -7,4 +7,4 @@ let ColourEnums = {
     BLACK: 'black'
 };
 
-export default ColourEnums;
+module.exports = ColourEnums;
