@@ -3,7 +3,6 @@
  */
 
 const figure = Symbol();
-const owner = Symbol();
 
 /**
  * @class
@@ -13,65 +12,32 @@ class CellModel{
 
     /**
      * Constructor for board cell model.
-     * @param {string|null} figureString    Name (string) of figure in this cell or null.
-     * @param {string|null} ownerString     Name (string, black or white) of owner of figure in this cell.
+     * @param {Figure|null} figureObject    Figure object in this cell or null.
      */
-    constructor(figureString, ownerString){
+    constructor(figureObject){
 
         /**
          * @private
-         * @type      {string|null}
+         * @type      {Figure|null}
          */
-        this[figure] = figureString;
-        /**
-         * @private
-         * @type      {string|null}
-         */
-        this[owner] = ownerString;
+        this[figure] = figureObject;
     }
-
     /**
      * Returns figure in this cell.
-     * @returns {string|null}
+     * @returns {Figure|null}
      */
     getFigure(){
 
         return this[figure];
     }
-
     /**
      * Sets new figure (or removes currently existing one) in this cell. Returns cell model instance (for chaining purposes).
-     * @param {string|null} figureString
+     * @param {Figure|null} figureObject
      * @return {CellModel}
      */
-    setFigure(figureString){
+    setFigure(figureObject){
 
-        this[figure] = figureString;
-        return this;
-    }
-
-    /**
-     * Returns owner of figure in this cell.
-     * @returns {string|null}
-     */
-    getOwner(){
-
-        return this[owner];
-    }
-
-    /**
-     * Sets new owner of figure in this cell. Returns cell model instance (for chaining purposes).
-     * @param {string|null} ownerString
-     * @return {CellModel}
-     */
-    setOwner(ownerString){
-
-        if(!this.getFigure()){
-
-            throw new Error(`Can't set owner of cell which doesn't contain any figure.`);
-        }
-
-        this[owner] = ownerString;
+        this[figure] = figureObject;
         return this;
     }
 }
