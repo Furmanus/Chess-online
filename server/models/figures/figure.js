@@ -53,7 +53,7 @@ class Figure{
         const figureName = this.getFigureName();
         //needed to calculate pawn possible moves
         const moveDirection = (this.getOwner() === ColourEnums.WHITE) ? DirectionEnums.NORTH : DirectionEnums.SOUTH;
-        const movesTableByDirection = (moveDirection === DirectionEnums.NORTH) ? [{x: 0, y: -2}] : [{x: 0, y: 2}];
+        const movesTableByDirection = (moveDirection === DirectionEnums.NORTH) ? [{x: 0, y: -2}, {x: 0, y: -1}] : [{x: 0, y: 2}, {x: 0, y: 1}];
         /**
          * Last condition in below ternary operator creates copy of array defined in figure_moves.js file.
          * That array contains REFERENCES to objects containing x and y move values. It is important to remember that, in case of dynamic modification of specific figure object

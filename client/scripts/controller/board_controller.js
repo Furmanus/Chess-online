@@ -15,7 +15,6 @@ const socketClientManager = Symbol();
  * @typedef {Object}    BoardController
  */
 class BoardController extends Observer{
-
     /**
      * Constructor for board controller.
      * @param {BoardView}           boardViewObject
@@ -38,8 +37,22 @@ class BoardController extends Observer{
         this[socketClientManager] = socketClientManagerInstance;
 
         this.attachEventListeners();
+        this.initialize();
     }
 
+    /**
+     * Method responsible for initialization of board controller.
+     */
+    initialize(){
+
+        this.getBoardStateFromServer().then(function(boardData){
+
+            this.setBoardStateInView(boardData);
+        }.bind(this)).catch(function(reason){
+
+            console.error(reason);
+        }.bind(this));
+    }
     /**
      * Method responsible for attaching event listeners.
      * @returns {undefined}
@@ -48,7 +61,6 @@ class BoardController extends Observer{
 
         this.listenToViewEvents();
     }
-
     /**
      * Method responsible for listening on board view for particular events.
      * @returns {undefined}
@@ -57,7 +69,6 @@ class BoardController extends Observer{
 
         this.getBoardView().on(this, EventEnums.BOARD_CLICK, this.onBoardCellClick.bind(this));
     }
-
     /**
      *  //TODO pobranie elementu zrobione, dokończyć resztę po zrobieniu modelu
      * @param   {Object}    data    Object containing coordinates of chosen cell.
@@ -66,10 +77,24 @@ class BoardController extends Observer{
      */
     onBoardCellClick(data){
 
-        //TODO wysłać dane do servera i po odpowiedzi zaktualizować widok
-        //this.getBoardView().toogleCellHighlight(data.x, data.y);
-    }
+        const self = this;
 
+        Ajax.get('/figure_moves', data).then(function(response){
+
+            if(response.action && response.action === 'reset'){
+
+                self.getBoardView().removeCellHighlightFromBoard();
+            }
+
+            if(response.action && response.action === 'highlight') {
+
+                self.getBoardView().highlightFigurePossibleMoves(response.data);
+            }
+        }).catch(function(error){
+
+            console.log(error);
+        })
+    }
     /**
      * Returns BoardView object.
      * @returns {BoardView} Returns BoardView object.
@@ -77,6 +102,28 @@ class BoardController extends Observer{
     getBoardView(){
 
         return this[boardView];
+    }
+    /**
+     * Method responsible for fetching board state (state of every cell in board) from server. Returned object consist keys equal to board cells coordinates ('2x3' for example)
+     * and values which are object with keys 'figure' and 'owner'.
+     * @return {Promise}
+     */
+    getBoardStateFromServer(){
+
+        return new Promise(function(resolve, reject){
+
+            Ajax.get('/board_state', {}).then(function(data){
+
+                resolve(data);
+            }).catch(function(reason){
+
+                reject(reason);
+            });
+        });
+    }
+    setBoardStateInView(boardState){
+
+        this.getBoardView().setGameStateFromObject(boardState);
     }
 }
 

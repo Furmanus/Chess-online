@@ -49,12 +49,6 @@ class BoardView extends Observer{
 
         this.prepareGameBoard();
         this.attachEventListeners();
-
-        let d = new Figure(FigureEnums.KING, ColourEnums.WHITE, this.getCell(1, 1).getElement());
-
-        let z = new Figure(FigureEnums.QUEEN, ColourEnums.BLACK, this.getCell(5, 6).getElement());
-
-        //d.moveTo(this.getCell(5, 6));
     }
 
     /**
@@ -75,6 +69,33 @@ class BoardView extends Observer{
             for(let j=0; j<8; j++){
 
                 this.setCell(j, i, new Cell(j, i, this.getGameBoard()));
+            }
+        }
+    }
+
+    /**
+     * Sets view of every cell from object fetched from server.
+     * @param {Object} gameState
+     */
+    setGameStateFromObject(gameState){
+
+        let x;
+        let y;
+        let figure;
+        let owner;
+        let parentElement;
+
+        for(let element in gameState){
+
+            x = element[0];
+            y = element[2];
+            figure = gameState[element].figure;
+            owner = gameState[element].owner;
+            parentElement = this.getCells().get(`${x}x${y}`);
+
+            if(figure){
+
+                parentElement.setFigure(new Figure(figure, owner, parentElement.getElement()));
             }
         }
     }
@@ -154,7 +175,32 @@ class BoardView extends Observer{
             targetCell.removeHighlightCell();
         }
     }
+    /**
+     * Highlights cells of possible moves of a figure. Cells coordinates are stored in array argument.
+     * @param {{x: number, y: number}[]}  possibleMoves
+     */
+    highlightFigurePossibleMoves(possibleMoves){
 
+        let examinedCell;
+
+        for(let coordinate of possibleMoves){
+
+            examinedCell = this.getCell(coordinate.x, coordinate.y);
+            examinedCell.highlightCell(HighlightEnums.BLUE);
+        }
+    }
+    /**
+     * Removes highlight from every cell on board.
+     */
+    removeCellHighlightFromBoard(){
+
+        const cellMap = this.getCells();
+
+        cellMap.forEach(function(key, value){
+
+            key.removeHighlightCell();
+        })
+    }
     /**
      * Method which converts string with coordinates into object with 'x' and 'y' properties.
      * @param   {string}                    String with cell coordinates. Example '2x1'.

@@ -147,8 +147,6 @@ class Figure{
             // when target point is reached
             if(x === targetPositionX && y === targetPositionY){
 
-
-
                 // We check if new cell has any figures, if yes, we remove them.
                 if(cell.getElement().children.length && cell.getElement().firstElementChild.classList.contains('figure')){
 

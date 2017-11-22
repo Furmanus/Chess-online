@@ -10,11 +10,15 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const path = require('path');
 const io = require('socket.io');
+const Router = require('./routes/router');
+const MainController = require('./controllers/main_controller');
 
 //declaration of private variables
 const server = Symbol();
 const app = Symbol();
 const socketManager = Symbol();
+const mainController = Symbol();
+const router = Symbol();
 
 /**
  * @class
@@ -32,6 +36,8 @@ class Server{
         this[app] = undefined;
         this[socketManager] = undefined;
         this[server] = undefined;
+        this[mainController] = undefined;
+        this[router] = undefined;
 
         this.initialize();
     }
@@ -40,6 +46,8 @@ class Server{
      * Initializes routes.
      */
     initialize(){
+
+        this[mainController] = new MainController();
 
         this.initializeExpressApplication();
         this.initializeServer();
@@ -59,10 +67,12 @@ class Server{
 
         this[app] = express();
 
+        this[router] = new Router(this.getMainController())
         this.getApp().use(bodyParser.urlencoded({extended: true}));
         this.getApp().use(bodyParser.json());
         this.getApp().use(cookieParser());
         this.getApp().use('/', express.static(path.join(__dirname, '../client')));
+        this.getApp().use(this.getRouter());
         this.getApp().set('port', process.env.PORT || 3000);
     }
 
@@ -97,7 +107,6 @@ class Server{
 
         return this[server];
     }
-
     /**
      * Returns express app instance.
      * @returns {Object}
@@ -106,7 +115,6 @@ class Server{
 
         return this[app];
     }
-
     /**
      * Returns socket connection.
      * @returns {SocketManager}
@@ -114,6 +122,22 @@ class Server{
     getSocketManager(){
 
         return this[socketManager];
+    }
+    /**
+     * Returns main controller of server application.
+     * @return {MainController}
+     */
+    getMainController(){
+
+        return this[mainController];
+    }
+    /**
+     * Returns router object.
+     * @return {Object}
+     */
+    getRouter(){
+
+        return this[router];
     }
 }
 

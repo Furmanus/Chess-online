@@ -5,7 +5,7 @@
 
 (function(){
 
-    const mainController = require('./server/controllers/main_controller');
+    const Server = require('./server/server');
 
-    new mainController();
+    new Server();
 })();
