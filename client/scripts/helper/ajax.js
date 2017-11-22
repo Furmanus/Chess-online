@@ -31,52 +31,62 @@ class Ajax{
      * Method responsible for sending AJAX POST request at certain url.
      * @param   {string}    url             URL adress where data should be send.
      * @param   {Object}    data            Data object to send.
-     * @param   {function}  callback        Callback function executed upon successful response.
+     * @param   {function}  onProgress      Callback on progress function.
      * @param   {boolean}   isJsonRequest   Parameter determining whether requests content-type should be 'application/json'. If set to false, it will be 'application/x-www-form-urlencoded'. By default set to true.
      */
-    static post(url, data, callback, isJsonRequest = true){
+    static post(url, data,  onProgress, isJsonRequest = true){
 
-        const ajax = new XMLHttpRequest();
-        const contentType = (isJsonRequest === true) ? 'application/json' : 'application/x-www-form-urlencoded';
+        return new Promise(function(resolve, reject){
 
-        ajax.open('POST', url, true);
-        ajax.setRequestHeader('Content-type', contentType);
+            const ajax = new XMLHttpRequest();
+            const contentType = (isJsonRequest === true) ? 'application/json' : 'application/x-www-form-urlencoded';
 
-        ajax.onreadystatechange = function(){
+            ajax.open('POST', url, true);
+            ajax.setRequestHeader('Content-type', contentType);
 
-            if(ajax.readyState === 4 && ajax.status === 200){
+            ajax.onprogress = onProgress;
+            ajax.onload = function(){
 
-                callback(ajax.response);
+                resolve(JSON.parse(ajax.response));
             }
-        };
+            ajax.onerror = function(){
 
-        data = (isJsonRequest === true) ? JSON.stringify(data) : buildQueryString(data);
+                reject(ajax.statusText);
+            }
 
-        ajax.send(data);
+            data = (isJsonRequest === true) ? JSON.stringify(data) : buildQueryString(data);
+
+            ajax.send(data);
+        });
     }
 
     /**
      * Method responsible for sending AJAX GET request at certain url.
      * @param   {string}    url         URL adress where data should be send.
      * @param   {Object}    data        Data object to send.
-     * @param   {function}  callback    Callback function executed upon successful response.
+     * @param   {function}  onProgress  Callback on progress function.
      */
-    static get(url, data, callback){
+    static get(url, data, onProgress){
 
-        const ajax = new XMLHttpRequest();
-        const path = `${url}?${buildQueryString(data)}`;
+        return new Promise(function(resolve, reject){
 
-        ajax.open('GET', path, true);
+            const ajax = new XMLHttpRequest();
+            const path = `${url}?${buildQueryString(data)}`;
 
-        ajax.onreadystatechange = function(){
+            ajax.open('GET', path, true);
 
-            if(ajax.readyState === 4 && ajax.status === 200){
+            ajax.onprogress = onProgress;
+            ajax.onload = function(){
 
-                callback(ajax.response);
+                resolve(JSON.parse(ajax.response));
+            };
+            ajax.onerror = function(){
+
+                reject(ajax.statusText);
             }
-        };
 
-        ajax.send();
+            ajax.send();
+        });
     }
 }
 

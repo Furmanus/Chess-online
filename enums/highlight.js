@@ -4,7 +4,7 @@
 let HighlightEnums = {
 
     RED: 'red',
-    BLUE: 'blue'
+    BLUE: 'blue',
 };
 
 export default HighlightEnums;

@@ -5,6 +5,7 @@ import HighlightEnums from "../../../../enums/highlight";
 //private variables of Cell class
 const parent = Symbol('parent');
 const element = Symbol('element');
+const figure = Symbol('figure');
 const x = Symbol('x');
 const y = Symbol('y');
 
@@ -29,19 +30,21 @@ class Cell{
 
         /**@type {number}*/
         this[y] = yCoordinate;
-
         /**
          * @private
          * @type {HTMLElement}
          */
         this[parent] = parentElement;
-
+        /**
+         * @private
+         * @type {null|Figure}
+         */
+        this[figure] = null;
         /**
          * @type {HTMLElement}
          * @private
          */
         this[element] = document.createElement('div');
-
         /**
          * @type {boolean|string}
          */
@@ -82,6 +85,22 @@ class Cell{
         }
     }
 
+    /**
+     * Sets figure object in this cell.
+     * @param {Figure} figureObject
+     */
+    setFigure(figureObject){
+
+        this[figure] = figureObject;
+    }
+    /**
+     * Returns figure from this cell.
+     * @return {Figure/null}
+     */
+    getFigure(){
+
+        return this[figure];
+    }
     /**
      * Returns HTMLElement appended to game board.
      * @returns {HTMLElement}

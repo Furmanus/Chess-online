@@ -72,24 +72,35 @@ class GameBoardModel extends Observer{
                 }
             }
         }
+
+        this.setCell(4, 4, new Figure(ColourEnums.BLACK, FigureEnums.PAWN));
     }
     setCell(x, y, figure){
 
         this.getCells().set(`${x}x${y}`, new CellModel(figure));
     }
     /**
-     * Returns figure which is stored in certain cell (or null if no figure is present) and its owner.
+     * Returns figure which is stored in certain cell (or null if no figure is present) and its owner (again null if no figure is present).
      * @param  {{x: number, y: number}} cell
      * @return {{figure: (string|null), owner: (string|null)}}
      */
     getCellData(cell){
 
-        const thisBoardModelInstance = this;
+        const figureObject = this.getCells().get(`${cell.x}x${cell.y}`).getFigure();
+
+        if(!figureObject){
+
+            return {
+
+                figure: null,
+                owner: null
+            }
+        }
 
         return {
 
-            figure: thisBoardModelInstance.getCells().get(`${cell.x}x${cell.y}`).getFigure(),
-            owner: thisBoardModelInstance.getCells().get(`${cell.x}x${cell.y}`).getOwner()
+            figure: figureObject.getFigureName(),
+            owner: figureObject.getOwner()
         }
     }
     /**
@@ -99,6 +110,36 @@ class GameBoardModel extends Observer{
     getCells(){
 
         return this[cells];
+    }
+    /**
+     * Returns cell of certain coordinates {x, y}
+     * @param {{x: number, y: number}}  coordinates
+     * @returns {Cell}
+     */
+    getCell(coordinates){
+
+        return this.getCells().get(`${coordinates.x}x${coordinates.y}`);
+    }
+    /**
+     * Returns figure in certain cell coordinates {x, y}.
+     * @param {{x: number, y: number}}  coordinates
+     * @returns {Figure|null}
+     */
+    getFigure(coordinates){
+
+        return this.getCell(coordinates).getFigure();
+    }
+    getDataToSerialization(){
+
+        const serializedBoardData = {};
+        const cellsMapKeys = this.getCells().keys();
+
+        for(let key of cellsMapKeys){
+
+            serializedBoardData[key] = this.getCellData({x: key[0], y: key[2]});
+        }
+
+        return serializedBoardData;
     }
 }
 

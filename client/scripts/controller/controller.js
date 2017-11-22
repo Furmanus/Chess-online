@@ -5,6 +5,7 @@ import PanelController from "./panel_controller";
 import View from "../view/view";
 import SocketClientManager from "../helper/socket_manager";
 import Observer from "../../../core/observer";
+import Ajax from "../helper/ajax";
 
 // declarations of class private fields
 const mainView = Symbol();
@@ -49,7 +50,6 @@ class MainController extends Observer{
          * @private
          */
         this[panelController] = new PanelController(this.getMainView().getPanelView(), this.getSocketClientManager());
-
     }
 
     /**
