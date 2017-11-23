@@ -34,7 +34,7 @@ class Router{
         }
 
         this.getBoardState = this.getBoardState.bind(this);
-        this.possibleFigureMovesRequest = this.possibleFigureMovesRequest.bind(this);
+        this.boardClickRequestHandler = this.boardClickRequestHandler.bind(this);
 
         this.initializePaths();
         return router;
@@ -43,7 +43,7 @@ class Router{
     initializePaths(){
 
         router.get('/board_state', this.getBoardState);
-        router.get('/figure_moves', this.possibleFigureMovesRequest);
+        router.post('/figure_moves', this.boardClickRequestHandler);
     }
     /**
      * Callback function for '/board_state' GET route. Takes board states from main controller and sends it in response.
@@ -54,17 +54,29 @@ class Router{
 
         res.json(this.getMainController().getBoardState());
     }
-    possibleFigureMovesRequest(req, res){
+
+    /**
+     * Callback function for '/figure_moves' POST request. Checks whether any figure is currently selected by player, and if yes, send to client array of possible moves.
+     * @param {Object} req
+     * @param {Object} res
+     */
+    boardClickRequestHandler(req, res){
 
         let chosenFigurePossibleMoves = undefined;
-        const coordinates = {x: parseInt(req.query.x), y: parseInt(req.query.y)};
+        const coordinates = {x: parseInt(req.body.x), y: parseInt(req.body.y)};
         const highlightedCell = this.getMainController().getCurrentlyHighlightedCell();
 
         if(!highlightedCell){
 
             chosenFigurePossibleMoves = this.getMainController().getFigureMoves(coordinates);
-            this.getMainController().setCurrentlyHighlightedCell(coordinates.x, coordinates.y);
-            res.send(JSON.stringify({action: 'highlight', data: chosenFigurePossibleMoves}));
+            if(Object.keys(chosenFigurePossibleMoves).length === 0){
+
+                res.send(JSON.stringify({action: 'no action'}));
+            }else {
+
+                this.getMainController().setCurrentlyHighlightedCell(coordinates.x, coordinates.y);
+                res.send(JSON.stringify({action: 'highlight', data: chosenFigurePossibleMoves}));
+            }
             return;
         }
         if(highlightedCell && coordinates.x === highlightedCell.x && coordinates.y === highlightedCell.y){

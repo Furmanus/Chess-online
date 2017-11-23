@@ -79,7 +79,7 @@ class BoardController extends Observer{
 
         const self = this;
 
-        Ajax.get('/figure_moves', data).then(function(response){
+        Ajax.post('/figure_moves', data).then(function(response){
 
             if(response.action && response.action === 'reset'){
 
@@ -88,6 +88,7 @@ class BoardController extends Observer{
 
             if(response.action && response.action === 'highlight') {
 
+                self.getBoardView().highlightCell(data.x, data.y, HighlightEnums.RED);
                 self.getBoardView().highlightFigurePossibleMoves(response.data);
             }
         }).catch(function(error){

@@ -160,16 +160,17 @@ class BoardView extends Observer{
 
     /**
      * Method responsible for toggling cell highlight.
-     * @param   {number}    x   Row(horizontal) coordinate of chosen cell.
-     * @param   {number}    y   Column(vertical) coordinate of chosen cell.
+     * @param   {number}    x       Row(horizontal) coordinate of chosen cell.
+     * @param   {number}    y       Column(vertical) coordinate of chosen cell.
+     * @param   {string}    colour  Colour of cell border. Member of ColourEnums object.
      */
-    toogleCellHighlight(x, y){
+    highlightCell(x, y, colour){
 
         const targetCell = this.getCell(x, y);
 
         if (!targetCell.isHighlighted) {
 
-            targetCell.highlightCell(HighlightEnums.RED);
+            targetCell.highlightCell(colour);
         } else {
 
             targetCell.removeHighlightCell();
