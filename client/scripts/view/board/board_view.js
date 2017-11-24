@@ -48,6 +48,9 @@ class BoardView extends Observer{
     initialize(){
 
         this.prepareGameBoard();
+
+        this.clickEventListener = this.clickEventListener.bind(this);
+
         this.attachEventListeners();
     }
 
@@ -56,9 +59,16 @@ class BoardView extends Observer{
      */
     attachEventListeners(){
 
-        this.getGameBoard().addEventListener('click', this.clickEventListener.bind(this));
+        this.getGameBoard().addEventListener('click', this.clickEventListener);
     }
 
+    /**
+     * Removes event listeners from game board.
+     */
+    detachEventListeners(){
+
+        this.getGameBoard().removeEventListener('click', this.clickEventListener);
+    }
     /**
      * Fills game board with board cells.
      * @returns {undefined}
