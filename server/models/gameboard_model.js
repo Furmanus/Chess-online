@@ -9,6 +9,7 @@ const Observer = require('./../../core/observer');
 const Figure = require('./figures/figure');
 
 const cells = Symbol();
+const currentFigurePossibleMoves = Symbol();
 
 /**
  * Class representing model of game board.
@@ -23,11 +24,10 @@ class GameBoardModel extends Observer{
     constructor(){
 
         super();
-        /**
-         * @private
-         * @type {Map}
-         */
+        /**@type {Map}*/
         this[cells] = new Map();
+        /**@type {null|Object}*/
+        this[currentFigurePossibleMoves] = null;
 
         this.initialize();
     }
@@ -45,7 +45,7 @@ class GameBoardModel extends Observer{
 
                 if(j === 1 || j === 6){
 
-                    this.setCell(i, j, new Figure(j === 0 ? ColourEnums.BLACK : ColourEnums.WHITE, FigureEnums.PAWN));
+                    this.setCell(i, j, new Figure(j === 1 ? ColourEnums.BLACK : ColourEnums.WHITE, FigureEnums.PAWN));
                 }else if(j === 0 || j === 7){
 
                     figureColour = j === 0 ? ColourEnums.BLACK : ColourEnums.WHITE;
@@ -72,8 +72,6 @@ class GameBoardModel extends Observer{
                 }
             }
         }
-
-        this.setCell(4, 4, new Figure(ColourEnums.BLACK, FigureEnums.PAWN));
     }
     setCell(x, y, figure){
 
@@ -140,6 +138,29 @@ class GameBoardModel extends Observer{
         }
 
         return serializedBoardData;
+    }
+    /**
+     * Sets currently selected figure possible moves variable.
+     * @param {null|Object} possibleMoves
+     */
+    setCurrentFigurePossibleMoves(possibleMoves){
+
+        this[currentFigurePossibleMoves] = possibleMoves;
+    }
+    /**
+     * Returns object containing currently selected figure possible moves or null, if no figure is selected.
+     * @returns {null|Object}
+     */
+    getCurrentFigurePossibleMoves(){
+
+        return this[currentFigurePossibleMoves];
+    }
+    /**
+     * Resets current figure possible moves (should happen if no figure is currently highlighted by any player.
+     */
+    resetCurrentFigurePossibleMoves(){
+
+        this[currentFigurePossibleMoves] = null;
     }
 }
 

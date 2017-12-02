@@ -111,10 +111,11 @@ class Figure{
 
     /**
      * Moves figures from currently occupied cell to another cell.
-     * @param {Cell} cell Destination cell.
+     * @param {Cell} sourceCell Source Cell.
+     * @param {Cell} targetCell Destination cell.
      * @returns {undefined}
      */
-    moveTo(cell){
+    moveTo(sourceCell, targetCell){
 
         const convertedStartingPosition = this.getCoordinatesRelativeToBoard();
         const thisPositionX = convertedStartingPosition.x;
@@ -122,15 +123,15 @@ class Figure{
         /**
          * Element top left should be at center of HTML cell, because after appending it to target cell, transform: translate(-50%, -50%) CSS rule will be applied
          * */
-        const targetPositionX = cell.getElement().offsetLeft + Math.floor(this.getElement().offsetWidth / 2);
-        const targetPositionY = cell.getElement().offsetTop + Math.floor(this.getElement().offsetHeight / 2);
+        const targetPositionX = targetCell.getElement().offsetLeft + Math.floor(this.getElement().offsetWidth / 2);
+        const targetPositionY = targetCell.getElement().offsetTop + Math.floor(this.getElement().offsetHeight / 2);
 
         /**
          * Remove element from its parent, and append it to game board. This is necessary, because later we want to modify its top and left properties, and they should be relative to
          * game board.
          */
         this.getParentElement().removeChild(this.getElement());
-        this.setParentElement(cell.getElement().offsetParent);
+        this.setParentElement(targetCell.getElement().offsetParent);
 
         /**
          * We set elements left and top position as converted coordinates relative to board.
@@ -148,14 +149,16 @@ class Figure{
             if(x === targetPositionX && y === targetPositionY){
 
                 // We check if new cell has any figures, if yes, we remove them.
-                if(cell.getElement().children.length && cell.getElement().firstElementChild.classList.contains('figure')){
+                if(targetCell.getElement().children.length && targetCell.getElement().firstElementChild.classList.contains('figure')){
 
-                    cell.getElement().removeChild(cell.getElement().firstChild);
+                    targetCell.getElement().removeChild(targetCell.getElement().firstChild);
                 }
 
                 // figure html element is removed from board html element, and appended to target cell
                 this.getParentElement().removeChild(this.getElement());
-                this.setParentElement(cell.getElement());
+                this.setParentElement(targetCell.getElement());
+
+                targetCell.setFigure(this);
 
                 // We set figure element top and left to previous values
                 this.getElement().style.left = '50%';

@@ -8,6 +8,7 @@ import EventEnums from "../../../enums/events";
 // declaration of private variables
 const boardView = Symbol();
 const socketClientManager = Symbol();
+const gameModel = Symbol();
 
 /**
  * Controller responsible for taking user input from game board, passing it to model and manipulating view.
@@ -19,24 +20,20 @@ class BoardController extends Observer{
      * Constructor for board controller.
      * @param {BoardView}           boardViewObject
      * @param {SocketClientManager} socketClientManagerInstance
+     * @param {GameModel}           gameModelObject
      */
-    constructor(boardViewObject, socketClientManagerInstance){
+    constructor(boardViewObject, socketClientManagerInstance, gameModelObject){
 
         super();
 
-        /**
-         * @type {BoardView}
-         * @private
-         */
+        /**@type {BoardView}*/
         this[boardView] = boardViewObject;
 
-        /**
-         * @type {SocketClientManager}
-         * @private
-         */
+        /**@type {SocketClientManager}*/
         this[socketClientManager] = socketClientManagerInstance;
+        /** @type {GameModel}*/
+        this[gameModel] = gameModelObject;
 
-        this.attachEventListeners();
         this.initialize();
     }
 
@@ -70,7 +67,14 @@ class BoardController extends Observer{
         this.getBoardView().on(this, EventEnums.BOARD_CLICK, this.onBoardCellClick.bind(this));
     }
     /**
-     *  //TODO pobranie elementu zrobione, dokończyć resztę po zrobieniu modelu
+     * Stops listening for notifications from view.
+     */
+    detachEventsInView(){
+
+        this.getBoardView().off(this, EventEnums.BOARD_CLICK);
+    }
+    /**
+     *  //TODO uzupełnic.
      * @param   {Object}    data    Object containing coordinates of chosen cell.
      * @param   {number}    data.x  Row(horizontal) coordinate of chosen cell.
      * @param   {number}    data.y  Column(vertical) coordinate of chosen cell.
@@ -78,6 +82,8 @@ class BoardController extends Observer{
     onBoardCellClick(data){
 
         const self = this;
+
+        data.colour = this.getGameModel().getPlayerColour();
 
         Ajax.post('/figure_moves', data).then(function(response){
 
@@ -125,6 +131,27 @@ class BoardController extends Observer{
     setBoardStateInView(boardState){
 
         this.getBoardView().setGameStateFromObject(boardState);
+    }
+    /**
+     * TODO uzupełnic
+     * @param sourceCoords
+     * @param targetCoords
+     */
+    moveFigure(sourceCoords, targetCoords){
+
+        this.getBoardView().removeCellHighlightFromBoard();
+        this.getBoardView().moveFigure(sourceCoords, targetCoords);
+    }
+    highlightFiguresAbleToMoveInView(figuresCoordinates){
+
+        this.getBoardView().highlightFiguresAbleToMove(figuresCoordinates);
+    }
+    /**
+     * @returns {GameModel}
+     */
+    getGameModel(){
+
+        return this[gameModel]
     }
 }
 

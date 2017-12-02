@@ -2,6 +2,9 @@
  * @author Lukasz Lach
  */
 
+import Observer from './../../../core/observer';
+import EventEnums from './../../../enums/events';
+
 //private variables declaration
 const socket = Symbol();
 let instance;
@@ -11,12 +14,14 @@ let instance;
  * @class
  * @typedef {Object}    SocketClientManager
  */
-class SocketClientManager{
+class SocketClientManager extends Observer{
 
     /**
      * @constructor
      */
     constructor(){
+
+        super();
 
         if(!instance){
 
@@ -40,13 +45,20 @@ class SocketClientManager{
     }
 
     /**
-     * Callback function after successful socket connection to routes.
+     * Callback function after successful socket connection to routes. Notifies main controller that connection is ready, and player data can be fetched from server.
      */
     onSocketConnection(){
 
-        console.log(this[socket].id);
+        this.notify(EventEnums.SOCKET_CONNECTION_ESTABLISHED);
     }
+    onBothPlayersReadyListener(){
 
+        console.log('both are ready!');
+    }
+    onPlayerMoveListener(data){
+
+        this.notify(EventEnums.CLIENT_NOTIFY_MOVE_READY, data);
+    }
     /**
      * Method responsible for initializing SocketClientManager class. Creates new socket connected to routes.
      */
@@ -55,6 +67,12 @@ class SocketClientManager{
         this[socket] = io();
 
         this[socket].on('connect', this.onSocketConnection.bind(this));
+        this[socket].on(EventEnums.BOTH_PLAYERS_READY, this.onBothPlayersReadyListener.bind(this));
+        this[socket].on(EventEnums.PLAYER_MOVED, this.onPlayerMoveListener.bind(this));
+    }
+    getSocketId(){
+
+        return this[socket].id;
     }
 }
 

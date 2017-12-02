@@ -2,6 +2,8 @@
  * @author Lukasz Lach
  */
 const SocketManager = require('./socket_manager/socket_manager');
+const Router = require('./routes/router');
+const eventEmmiter = require('./helper/event_emmiter');
 
 const http = require('http');
 const express = require('express');
@@ -10,8 +12,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const path = require('path');
 const io = require('socket.io');
-const Router = require('./routes/router');
 const MainController = require('./controllers/main_controller');
+const EventEnums = require('./../enums/events');
 
 //declaration of private variables
 const server = Symbol();
@@ -31,7 +33,6 @@ class Server{
      * @constructor
      */
     constructor(){
-
         // declaration of private variables. They are initialized later on.
         this[app] = undefined;
         this[socketManager] = undefined;
@@ -39,7 +40,17 @@ class Server{
         this[mainController] = undefined;
         this[router] = undefined;
 
+        this.bothPlayersReadyEventListener = this.bothPlayersReadyEventListener.bind(this);
+        this.onClientDisconnect = this.onClientDisconnect.bind(this);
+
         this.initialize();
+        this.listenToEvents();
+    }
+
+    listenToEvents(){
+
+        eventEmmiter.on(EventEnums.SEND_SERVER_GAME_STATUS_READY, this.bothPlayersReadyEventListener);
+        eventEmmiter.on(EventEnums.CLIENT_DISCONNECTED, this.onClientDisconnect);
     }
 
     /**
@@ -52,6 +63,9 @@ class Server{
         this.initializeExpressApplication();
         this.initializeServer();
         this.createSocketManager(this.getServer(), io);
+        //TODO naprawic zjebany singleton routera
+        this.getRouter().addSocketManager(this.getSocketManager());
+
         this.startListening();
     }
 
@@ -61,7 +75,7 @@ class Server{
     }
 
     /**
-     * Method which makes routes use various middleware functions and sets routes variables.
+     * Method which makes router use various middleware functions and sets routes variables.
      */
     initializeExpressApplication(){
 
@@ -72,7 +86,7 @@ class Server{
         this.getApp().use(bodyParser.json());
         this.getApp().use(cookieParser());
         this.getApp().use('/', express.static(path.join(__dirname, '../client')));
-        this.getApp().use(this.getRouter());
+        this.getApp().use(this.getRouter().getRouterObject());
         this.getApp().set('port', process.env.PORT || 3000);
     }
 
@@ -83,7 +97,7 @@ class Server{
      */
     createSocketManager(server, socketIo){
 
-        this[socketManager] = new SocketManager(server, socketIo);
+        this[socketManager] = new SocketManager(server, socketIo, this.getMainController());
     }
 
     /**
@@ -98,7 +112,22 @@ class Server{
             console.log(`Server is listening at port ${port}.`);
         })
     }
+    /**
+     * Callback function triggered after client disconnection.
+     * @param {Object}  data
+     * @param {string}  data.socketId
+     */
+    onClientDisconnect(data){
 
+        this.getMainController().removePlayerFromGameModel(data.socketId);
+    }
+    /**
+     * Callback function triggered when router notifies server, that second player(black) has logged into game.
+     */
+    bothPlayersReadyEventListener(){
+
+        this.getSocketManager().emitEventToAll(EventEnums.BOTH_PLAYERS_READY);
+    }
     /**
      * Returns http routes instance.
      * @returns {Object}

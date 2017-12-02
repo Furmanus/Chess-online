@@ -47,17 +47,16 @@ class BoardView extends Observer{
      */
     initialize(){
 
-        this.prepareGameBoard();
-
         this.clickEventListener = this.clickEventListener.bind(this);
 
+        this.prepareGameBoard();
         this.attachEventListeners();
     }
 
     /**
      * Attaches event listeners to game board.
      */
-    attachEventListeners(){
+    attachEventListeners(colour){
 
         this.getGameBoard().addEventListener('click', this.clickEventListener);
     }
@@ -188,16 +187,29 @@ class BoardView extends Observer{
     }
     /**
      * Highlights cells of possible moves of a figure. Cells coordinates are stored in array argument.
-     * @param {{x: number, y: number}[]}  possibleMoves
+     * @param {{x: number, y: number}[]}    possibleMoves
      */
     highlightFigurePossibleMoves(possibleMoves){
 
+        this.highlightArrayOfCells(possibleMoves, HighlightEnums.BLUE);
+    }
+    highlightFiguresAbleToMove(figuresCoords){
+        //TODO CZEMU TO NIE DZIALA DO KURWY NĘDZY?
+        //this.highlightArrayOfCells(figuresCoords, HighlightEnums.GREEN);
+    }
+    /**
+     * Highlights array of cells given as argument
+     * @param {Array.{x: number, y: number}}    coordinates
+     * @param {string}                          colour
+     */
+    highlightArrayOfCells(coordinates, colour){
+
         let examinedCell;
 
-        for(let coordinate of possibleMoves){
+        for(let coordinate of coordinates){
 
             examinedCell = this.getCell(coordinate.x, coordinate.y);
-            examinedCell.highlightCell(HighlightEnums.BLUE);
+            examinedCell.highlightCell(colour);
         }
     }
     /**
@@ -223,11 +235,22 @@ class BoardView extends Observer{
 
             throw new Error('Invalid string coordinates type.');
         }
-
         const x = parseInt(string.charAt(0));
         const y = parseInt(string.charAt(2));
 
         return {x: x, y: y};
+    }
+    /**
+     * Method initializing animation of moving figure from source cell to target cell.
+     * @param {{x: number, y: number}}  sourceCoords
+     * @param {{x: number, y: number}}  targetCoords
+     */
+    moveFigure(sourceCoords, targetCoords){
+
+        const sourceCell = this.getCell(sourceCoords.x, sourceCoords.y);
+        const targetCell = this.getCell(targetCoords.x, targetCoords.y);
+
+        this.getCell(sourceCoords.x, sourceCoords.y).getFigure().moveTo(sourceCell, targetCell);
     }
 }
 
