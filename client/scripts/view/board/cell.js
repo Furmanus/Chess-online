@@ -156,11 +156,15 @@ class Cell{
      * @param {string} colour Colour of cell border.
      * @returns {undefined}
      */
-    highlightCell(colour){
+    highlightCell(colour) {
 
-        if(!Object.values(HighlightEnums).includes(colour)){
+        if (!Object.values(HighlightEnums).includes(colour)) {
 
             throw new Error('Invalid colour for cell to highlight');
+        }
+        if(this.isHighlighted){
+
+            return;
         }
 
         this.addClass(colour + '_border');

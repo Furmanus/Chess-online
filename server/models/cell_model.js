@@ -40,6 +40,13 @@ class CellModel{
         this[figure] = figureObject;
         return this;
     }
+    /**
+     * Removes figure from cell.
+     */
+    removeFigure(){
+
+        this[figure] = null;
+    }
 }
 
 module.exports = CellModel;

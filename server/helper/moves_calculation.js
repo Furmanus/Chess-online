@@ -6,7 +6,7 @@ const FigureEnums = require('./../../enums/figures');
 const ColourEnums = require('./../../enums/colours');
 
 /**
- * Method responsible for returning array which contains object with coordinates of possible moves.
+ * Method responsible for returning array containing objects with coordinates of certain figure possible moves.
  * @param {Figure}                  figure
  * @param {{x: number, y: number}}  startingPoint
  * @param {Object}                  boardState
@@ -21,16 +21,21 @@ module.exports = function(figure, startingPoint, boardState){
     let currentPoint = null
 
     if(figure.getPossibleMoves().continous){
-
+        //calculating moves for rook, bishop and queen
         for(let direction of moves){
-
+            /**
+             * For every direction point in figure moves object, we set current point, which is next point in chosen direction from figure starting point. Next we start
+             * recursive function which triggers itself on each next point in chosen direction, unless blocked by other figure or edge of game board.
+             */
             currentPoint = {x: startingPoint.x + direction.x, y: startingPoint.y + direction.y};
             calculateMovesInDirection(direction);
         }
     }else{
-
+        //calculating moves for pawn
         if(figure.getPossibleMoves().directional){
-            //TODO dorobić bicie po ukosie
+            //we check if examined pawn moves north or south, and we take only object where pawn moves by one field. We use it later to calculate diagonal captures.
+            const verticalDirection = moves[moves.length - 1];
+
             for(let move of moves){
                 currentPoint = {x: startingPoint.x + move.x, y: startingPoint.y + move.y};
 
@@ -38,14 +43,31 @@ module.exports = function(figure, startingPoint, boardState){
 
                     continue;
                 }
-
                 if(!boardState[`${currentPoint.x}x${currentPoint.y}`].figure) {
 
                     resultPossibleMoves.push({x: startingPoint.x + move.x, y: startingPoint.y + move.y});
                 }
+                if(currentPoint.x - 1 >= 0){
+
+                    let examinedDiagonalLeftPoint = boardState[`${currentPoint.x - 1}x${startingPoint.y + verticalDirection.y}`];
+
+                    if(examinedDiagonalLeftPoint.figure && examinedDiagonalLeftPoint.figure.owner !== owner){
+
+                        resultPossibleMoves.push({x: currentPoint.x - 1, y: startingPoint.y + verticalDirection.y});
+                    }
+                }
+                if(currentPoint.x + 1 <= 7){
+
+                    let examinedDiagonalRightPoint = boardState[`${currentPoint.x + 1}x${startingPoint.y + verticalDirection.y}`];
+
+                    if(examinedDiagonalRightPoint.figure && examinedDiagonalRightPoint.figure.owner !== owner){
+
+                        resultPossibleMoves.push({x: currentPoint.x + 1, y: startingPoint.y + verticalDirection.y});
+                    }
+                }
             }
         }else{
-
+            //calculating moves for king and knight
             for(let move of moves){
 
                 currentPoint = {x: startingPoint.x + move.x, y: startingPoint.y + move.y};

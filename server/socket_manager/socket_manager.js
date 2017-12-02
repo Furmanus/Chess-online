@@ -1,10 +1,13 @@
 /**
  * @author Lukasz Lach
  */
-const Client = require('./../models/connected_client');
+
+const EventEnums = require('./../../enums/events');
+const eventEmmiter = require('./../helper/event_emmiter');
 
 const socketIo = Symbol();
 const clients = Symbol();
+const mainController = Symbol();
 
 /**
  * Class responsible for managing sockets from routes side.
@@ -16,17 +19,20 @@ class SocketManager{
     /**
      * Constructor for SockerManager class. Creates instance of socket.io object attached to http routes.
      * @constructor
-     * @param   {Object}    server  Instance of http routes (taken from 'require('http').Server(app), where app is express object instance).
-     * @param   {Object}    socket  Instance of socketIo object (taken from 'require('socket.io').
+     * @param   {Object}            server  Instance of http routes (taken from 'require('http').Server(app), where app is express object instance).
+     * @param   {Object}            socket  Instance of socketIo object (taken from 'require('socket.io').
+     * @param   {MainController}    mainControllerObject    Instance of main game controller object.
      */
-    constructor(server, socket){
+    constructor(server, socket, mainControllerObject){
 
         this[socketIo] = socket(server);
-        this[clients] = new Map();
+        /**@type {MainController*/
+        this[mainController] = mainControllerObject;
+
+        this.connectionEventListener = this.connectionEventListener.bind(this);
 
         this.initialize();
     }
-
     /**
      * Initializes work of SockerManager.
      */
@@ -40,12 +46,21 @@ class SocketManager{
      */
     attachEventListeners(){
 
-        this.getSocketIo().on('connection', function(socket){
-
-            this.getClients().set(socket.id, new Client(socket, null));
-        }.bind(this));
+        this.listenOnEvent('connection', this.connectionEventListener);
     }
+    /**
+     * Callback function triggered after successful client socket connection.
+     * @param socket
+     */
+    connectionEventListener(socket){
 
+        //const playerColour = this.getMainController().getInitialPlayerData(socket.id);
+
+        socket.on('disconnect', function(){
+
+            eventEmmiter.emit(EventEnums.CLIENT_DISCONNECTED, {socketId: socket.id});
+        });
+    }
     /**
      * Method responsible for making socket listen to certain event.
      * @param   {string}    event       Event on which socket should listen.
@@ -55,7 +70,6 @@ class SocketManager{
 
         this.getSocketIo().on(event, callback);
     }
-
     /**
      * Returns instance of socket.io object attached to http routes.
      * @returns {Object}
@@ -64,14 +78,43 @@ class SocketManager{
 
         return this[socketIo];
     }
-
     /**
-     * Returns Map object with connected sockets (key in map is equal to socket ID, values are data like socket, etc.)
-     * @returns {Map}
+     * Returns main game controller.
+     * @returns {MainController}
      */
-    getClients(){
+    getMainController(){
 
-        return this[clients];
+        return this[mainController];
+    }
+    /**
+     * Method responsible for emmiting event when one player successfully moved one of his figures.
+     * @param {Object}                  data                Additional data to pass to client.
+     * @param {string}                  data.newPlayer      Currently active player(AFTER this move).
+     * @param {{x: number, y: number}}  data.sourceCoords   Source coordinates of moved figure.
+     * @param {{x: number, y: number}}  data.targetCoords   Target coordinates of moved figure.
+     */
+    emitMoveEventToAll(data){
+
+        this.emitEventToAll(EventEnums.PLAYER_MOVED, data);
+    }
+    /**
+     * Method responsible for emmiting event to specific client socket.
+     * @param {string}      clientId    Id of socket to which we want to emit event
+     * @param {string}      eventType   Name of event
+     * @param {Object}      data        Additional data to send with event.
+     */
+    emitEventToSpecifiedClient(clientId, eventType, data = {}){
+
+        this.getSocketIo().sockets.connected[clientId].emit(eventType, data);
+    }
+    /**
+     * Method responsible for emmiting events to all connected sockets (including the sender)
+     * @param {string}      eventType   Name of event
+     * @param {Object}      data        Additional data to send with event.
+     */
+    emitEventToAll(eventType, data = {}){
+
+        this.getSocketIo().sockets.emit(eventType, data);
     }
 }
 

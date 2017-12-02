@@ -10,6 +10,7 @@ const figuresPossibleMoves = require('./figure_moves');
 const owner = Symbol();
 const possibleMoves = Symbol();
 const figureName = Symbol();
+const hasMoved = Symbol();
 
 /**
  * Class representing pawn figure data model.
@@ -27,20 +28,17 @@ class Figure{
         /**
          * @type {string}
          * @memberOf {ColourEnums}
-         * @private
          */
         this[owner] = playerOwner;
-        /**
-         * @private
-         * @type {Object}
-         */
+        /**@type {Object}*/
         this[possibleMoves] = {};
         /**
-         * @private
          * @memberOf {FigureEnums}
          * @type {string}
          */
         this[figureName] = figureType;
+        /**@type {boolean}*/
+        this[hasMoved] = false;
 
         this.initializePossibleMoves();
     }
@@ -69,12 +67,12 @@ class Figure{
     /**
      * Method responsible for marking figure as moved (after initial movement) and reducing its moving distance to 1 cell.
      */
-    markPawnAsMoved(){
+    markFigureAsMoved(){
 
         const moveValueToSubstract = (this.getOwner() === ColourEnums.WHITE) ? -1 : 1;
 
-        this.getPossibleMoves().hasMoved = true;
-        this.getPossibleMoves().moves[0].y - moveValueToSubstract;
+        this[hasMoved] = true;
+        this.getPossibleMoves().moves.splice(0, 1);
     }
     /**
      * Returns possible moves object of a figure.
@@ -99,6 +97,14 @@ class Figure{
     getFigureName(){
 
         return this[figureName];
+    }
+    /**
+     * Returns boolean variable indicating whether figure has moved or not.
+     * @returns {boolean}
+     */
+    hasFigureMoved(){
+
+        return this[hasMoved];
     }
 }
 
