@@ -55,7 +55,7 @@ class Figure{
         /**
          * Last condition in below ternary operator creates copy of array defined in figure_moves.js file.
          * That array contains REFERENCES to objects containing x and y move values. It is important to remember that, in case of dynamic modification of specific figure object
-         * moves. Right now it doesn't matter, because except for pawn, all figures have fixed set of moves.
+         * moves. Right now it doesn't matter, because except for pawn, all figures have fixed set of moves which doesn't change as game goes on.
          */
         const figureMoves = (figureName === FigureEnums.PAWN) ? movesTableByDirection : figuresPossibleMoves[figureName].moves.slice();
 
