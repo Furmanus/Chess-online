@@ -33,7 +33,17 @@ class SocketClientManager extends Observer{
 
         return instance;
     }
+    /**
+     * Method responsible for initializing SocketClientManager class. Creates new socket connected to routes.
+     */
+    initialize(){
 
+        this[socket] = io();
+
+        this[socket].on('connect', this.onSocketConnection.bind(this));
+        this[socket].on(EventEnums.BOTH_PLAYERS_READY, this.onBothPlayersReadyListener.bind(this));
+        this[socket].on(EventEnums.PLAYER_MOVED, this.onPlayerMoveListener.bind(this));
+    }
     /**
      * Method responsible for making socket listen to certain event.
      * @param   {string}    event       Event on which socket should listen.
@@ -53,22 +63,11 @@ class SocketClientManager extends Observer{
     }
     onBothPlayersReadyListener(){
 
-        console.log('both are ready!');
+        this.notify(EventEnums.BOTH_PLAYERS_READY);
     }
     onPlayerMoveListener(data){
 
         this.notify(EventEnums.CLIENT_NOTIFY_MOVE_READY, data);
-    }
-    /**
-     * Method responsible for initializing SocketClientManager class. Creates new socket connected to routes.
-     */
-    initialize(){
-
-        this[socket] = io();
-
-        this[socket].on('connect', this.onSocketConnection.bind(this));
-        this[socket].on(EventEnums.BOTH_PLAYERS_READY, this.onBothPlayersReadyListener.bind(this));
-        this[socket].on(EventEnums.PLAYER_MOVED, this.onPlayerMoveListener.bind(this));
     }
     getSocketId(){
 
