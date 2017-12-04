@@ -109,15 +109,19 @@ class Router{
 
                 sourceCoords: highlightedCell,
                 targetCoords: coordinates,
+                movedFigure: undefined,
+                previousPlayer: undefined,
+                capturedFigure: undefined,
                 activePlayer: undefined,
                 activePlayerFiguresToMove: undefined
             }
             //move figure(change data) in board model
-            this.getMainController().moveFigure(highlightedCell, coordinates);
+            data.movedFigure = this.getMainController().moveFigure(highlightedCell, coordinates);
+            data.previousPlayer = this.getMainController().getActivePlayer();
             //change active player in game model
-            this.getMainController().toggleActivePlayer();
+            data.activePlayer = this.getMainController().toggleActivePlayer();
+            data.capturedFigure = this.getMainController().getFigureCapturedLastTurn();
 
-            data.activePlayer = this.getMainController().getActivePlayer();
             data.activePlayerFiguresToMove = this.getMainController().getActivePlayerFiguresToMove();
 
             //we emit event containing move data to all connected sockets

@@ -39,6 +39,7 @@ class MainController extends Observer{
 
         this.fetchPlayerDataFromServer = this.fetchPlayerDataFromServer.bind(this);
         this.onPlayerMoveReady = this.onPlayerMoveReady.bind(this);
+        this.onGameReady = this.onGameReady.bind(this);
 
         this.initialize();
     }
@@ -50,8 +51,15 @@ class MainController extends Observer{
 
         this.getSocketClientManager().on(this, EventEnums.SOCKET_CONNECTION_ESTABLISHED, this.fetchPlayerDataFromServer);
         this.getSocketClientManager().on(this, EventEnums.CLIENT_NOTIFY_MOVE_READY, this.onPlayerMoveReady);
+        this.getSocketClientManager().on(this, EventEnums.BOTH_PLAYERS_READY, this.onGameReady);
     }
+    /**
+     * Method responsible for initializing game after receiving message from server that both players are ready.
+     */
+    onGameReady(){
 
+        this.getPanelController().addMessageInView('Both players are ready! White starts the game.');
+    }
     /**
      * Method responsible for sending initial AJAX post request to server.
      */
@@ -79,7 +87,11 @@ class MainController extends Observer{
      */
     onPlayerMoveReady(data){
 
+        const fromString = `${data.sourceCoords.x + 1}x${data.sourceCoords.y + 1}`;
+        const targetString = `${data.targetCoords.x + 1}x${data.targetCoords.y + 1}`;
+
         if(data.activePlayer === this.getGameModel().getPlayerColour()){
+
             this.getBoardController().listenToViewEvents();
             this.getBoardController().highlightFiguresAbleToMoveInView(data.activePlayerFiguresToMove);
         }else{
@@ -88,6 +100,12 @@ class MainController extends Observer{
         }
 
         this.getBoardController().moveFigure(data.sourceCoords, data.targetCoords);
+        this.getPanelController().addMessageInView(`${data.previousPlayer} player moved ${data.movedFigure} from ${fromString} to ${targetString}.`);
+
+        if(data.capturedFigure){
+            
+            this.getPanelController().addMessageInView(`${data.previousPlayer} player captured ${data.activePlayer} player's ${data.capturedFigure}!`);
+        }
     }
     /**
      * Returns board controller.

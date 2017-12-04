@@ -24,7 +24,14 @@ class PanelController extends Observer{
         this[panelView] = panelViewObject;
         this[socketClientManager] = socketClientManagerInstance;
     }
+    /**
+     * Method responsible for adding message in panel view.
+     * @param {string}  message
+     */
+    addMessageInView(message){
 
+        this.getPanelView().addMessage(message);
+    }
     /**
      * Returns PanelView object.
      * @returns {PanelView}
@@ -33,7 +40,6 @@ class PanelController extends Observer{
 
         return this[panelView];
     }
-
     /**
      * Returns socket manager for client side.
      * @returns {SocketClientManager}

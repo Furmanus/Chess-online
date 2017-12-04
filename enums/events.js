@@ -9,6 +9,7 @@ let EventEnums = {
     BOARD_CLICK: 'board:click',
     SOCKET_CONNECTION_ESTABLISHED: 'socket:connection_ready',
     CLIENT_NOTIFY_MOVE_READY: 'client_notify_move_ready',
+    BOTH_PLAYERS_READY: 'both:players:ready',
     //SERVER EVENTS
     SEND_SERVER_GAME_STATUS_READY: 'server:players_ready',
     CLIENT_DISCONNECTED: 'client:disconnected',

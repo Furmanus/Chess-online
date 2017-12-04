@@ -110,10 +110,11 @@ class GameModel extends Observer{
     /**
      * Sets active player.
      * @param {string|undefined} playerColour
+     * @returns {string|undefined}
      */
     setActivePlayer(playerColour){
 
-        this[activePlayer] = playerColour;
+        return this[activePlayer] = playerColour;
     }
     /**
      * Returns object with players white and black id numbers (or null if colours have not been taken)

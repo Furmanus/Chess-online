@@ -10,6 +10,7 @@ const Figure = require('./figures/figure');
 
 const cells = Symbol();
 const currentFigurePossibleMoves = Symbol();
+const figureCapturedLastTurn = Symbol();
 
 /**
  * Class representing model of game board.
@@ -28,6 +29,11 @@ class GameBoardModel extends Observer{
         this[cells] = new Map();
         /**@type {null|Object}*/
         this[currentFigurePossibleMoves] = null;
+        /**
+         * Name of figure captured in last turn. Used only for purpose sending message to client about captured figures. Empty string means that no figure was captured in last turn.
+         * @type {string}
+         */
+        this[figureCapturedLastTurn] = '';
 
         this.initialize();
     }
@@ -126,6 +132,22 @@ class GameBoardModel extends Observer{
     getFigure(coordinates){
 
         return this.getCell(coordinates).getFigure();
+    }
+    /**
+     * Returns figure captured in last move.
+     * @returns {string}
+     */
+    getFigureCapturedLastTurn(){
+
+        return this[figureCapturedLastTurn];
+    }
+    /**
+     * Sets name of figure captured in last move. Empty string means that no figure was captured.
+     * @param {string}  capturedFigure
+     */
+    setFigureCapturedLastTurn(capturedFigure){
+
+        this[figureCapturedLastTurn] = capturedFigure;
     }
     getDataToSerialization(){
 

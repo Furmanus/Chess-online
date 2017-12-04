@@ -85,6 +85,7 @@ class BoardController extends Observer{
         const sourceCell = this.getGameBoardModel().getCell(sourceCoords);
         const targetCell = this.getGameBoardModel().getCell(targetCoords);
         const movedFigure = sourceCell.getFigure()
+        const capturedFigure = targetCell.getFigure();
 
         targetCell.setFigure(movedFigure);
         sourceCell.removeFigure();
@@ -93,6 +94,16 @@ class BoardController extends Observer{
 
             movedFigure.markFigureAsMoved();
         }
+
+        if(capturedFigure){
+
+            this.getGameBoardModel().setFigureCapturedLastTurn(capturedFigure.getFigureName());
+        }else{
+
+            this.getGameBoardModel().setFigureCapturedLastTurn('');
+        }
+
+        return movedFigure.getFigureName();
     }
 
     /**
@@ -119,6 +130,14 @@ class BoardController extends Observer{
         }
 
         return figuresAbleToMove;
+    }
+    /**
+     * Returns figure captured last turn from game board model.
+     * @returns {string}
+     */
+    getFigureCapturedLastTurn(){
+
+        return this.getGameBoardModel().getFigureCapturedLastTurn();
     }
 }
 

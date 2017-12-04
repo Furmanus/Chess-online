@@ -45,13 +45,13 @@ class MainController extends Observer{
     }
     /**
      * Changes active player in game model.
-     * @returns {undefined}
+     * @returns {undefined|string}
      */
     toggleActivePlayer(){
 
         const currentActivePlayer = this.getGameModel().getActivePlayer();
 
-        this.getGameModel().setActivePlayer(currentActivePlayer === ColourEnums.WHITE ? ColourEnums.BLACK : ColourEnums.WHITE);
+        return this.getGameModel().setActivePlayer(currentActivePlayer === ColourEnums.WHITE ? ColourEnums.BLACK : ColourEnums.WHITE);
     }
     /**
      * Sets active player in game model.
@@ -151,13 +151,21 @@ class MainController extends Observer{
     }
     moveFigure(sourceCoords, targetCoords){
 
-        this.getBoardController().moveFigure(sourceCoords, targetCoords);
+        return this.getBoardController().moveFigure(sourceCoords, targetCoords);
     }
     getActivePlayerFiguresToMove(){
 
         const activePlayer = this.getActivePlayer();
 
         return this.getBoardController().getPlayerFiguresAbleToMove(activePlayer);
+    }
+    /**
+     * Returns figure captured last turn from game board model.
+     * @returns {string}
+     */
+    getFigureCapturedLastTurn(){
+
+        return this.getBoardController().getFigureCapturedLastTurn();
     }
 }
 
