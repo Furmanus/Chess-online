@@ -51,7 +51,7 @@ module.exports = function(figure, startingPoint, boardState){
 
                     let examinedDiagonalLeftPoint = boardState[`${currentPoint.x - 1}x${startingPoint.y + verticalDirection.y}`];
 
-                    if(examinedDiagonalLeftPoint.figure && examinedDiagonalLeftPoint.figure.owner !== owner){
+                    if(examinedDiagonalLeftPoint.figure && examinedDiagonalLeftPoint.owner !== owner){
 
                         resultPossibleMoves.push({x: currentPoint.x - 1, y: startingPoint.y + verticalDirection.y});
                     }
@@ -60,7 +60,7 @@ module.exports = function(figure, startingPoint, boardState){
 
                     let examinedDiagonalRightPoint = boardState[`${currentPoint.x + 1}x${startingPoint.y + verticalDirection.y}`];
 
-                    if(examinedDiagonalRightPoint.figure && examinedDiagonalRightPoint.figure.owner !== owner){
+                    if(examinedDiagonalRightPoint.figure && examinedDiagonalRightPoint.owner !== owner){
 
                         resultPossibleMoves.push({x: currentPoint.x + 1, y: startingPoint.y + verticalDirection.y});
                     }
