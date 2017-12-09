@@ -4,6 +4,7 @@
 const SocketManager = require('./socket_manager/socket_manager');
 const Router = require('./routes/router');
 const eventEmmiter = require('./helper/event_emmiter');
+const MongoDb = require('./helper/database');
 
 const http = require('http');
 const express = require('express');
@@ -21,6 +22,7 @@ const app = Symbol();
 const socketManager = Symbol();
 const mainController = Symbol();
 const router = Symbol();
+const databaseConnection = Symbol();
 
 /**
  * @class
@@ -39,6 +41,7 @@ class Server{
         this[server] = undefined;
         this[mainController] = undefined;
         this[router] = undefined;
+        this[databaseConnection] = new MongoDb();
 
         this.bothPlayersReadyEventListener = this.bothPlayersReadyEventListener.bind(this);
         this.onClientDisconnect = this.onClientDisconnect.bind(this);
