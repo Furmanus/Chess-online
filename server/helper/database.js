@@ -16,8 +16,13 @@ class DatabaseConnection{
 
     constructor(){
 
-        this.insertNewUser('ania', '4646456').then(function(){console.log('insertion successful')});
     }
+    /**
+     * Method responsible for inserting new user data into database.
+     * @param {string}  user
+     * @param {string}  password
+     * @returns {Promise<T>} Returns promise. Resolved promise returns data obtained from database, rejected promise returns error object.
+     */
     insertNewUser(user, password){
 
         const databaseDocument = {
@@ -34,6 +39,12 @@ class DatabaseConnection{
             console.error(error);
         })
     }
+    /**
+     * Method responsible for obtaining user data from database.
+     * @param {string}  user
+     * @returns {Promise<T>}    Returns promise. Resolved promise returns array of user documents matching query {user: user}. Each data contains users name, password and array of
+     * active games.
+     */
     findUserByName(user){
 
         return this.makeDatabaseConnection().then(function(db){
@@ -41,6 +52,10 @@ class DatabaseConnection{
             return db.collection(DatabaseEnums.USERS).find({user}).toArray();
         });
     }
+    /**
+     * Helper method responsible for making connection to database.
+     * @returns {Promise} Returns promise. Resolved promise returns database object, which can be used to insert, find, etc.
+     */
     makeDatabaseConnection(){
 
         return MongoClient.connect(databaseUrl);

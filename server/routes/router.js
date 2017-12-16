@@ -7,6 +7,7 @@ const EventEnums = require('./../../enums/events');
 const ColourEnums = require('./../../enums/colours');
 
 const eventEmmiter = require('./../helper/event_emmiter');
+const path = require('path');
 
 const mainController = Symbol();
 const socketManager = Symbol();
@@ -31,6 +32,8 @@ class Router{
         this.getBoardState = this.getBoardState.bind(this);
         this.boardClickRequestHandler = this.boardClickRequestHandler.bind(this);
         this.getInitialPlayerData = this.getInitialPlayerData.bind(this);
+        this.playerLoginHandler = this.playerLoginHandler.bind(this);
+        this.getUserGames = this.getUserGames.bind(this);
 
         this.initializePaths();
     }
@@ -39,10 +42,12 @@ class Router{
         this[socketManager] = socketManagerObject;
     }
     initializePaths(){
-
+        //TODO zamienić ścieżki na enumy
         this.getRouterObject().get('/board_state', this.getBoardState);
         this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler);
         this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData);
+        this.getRouterObject().post('/login_form_validate', this.playerLoginHandler);
+        this.getRouterObject().get('/games', this.getUserGames);
     }
     /**
      * Callback function which takes from game model initial player data and sends it back in response.
@@ -135,6 +140,39 @@ class Router{
 
             res.send(JSON.stringify({action: 'no action'}));
         }
+    }
+    playerLoginHandler(req, res){
+
+        this.getMainController().getDatabaseUserDataPromise(req.body.login).then(function(data){
+
+            let requestResult = {};
+
+            if(!data.length || data[0].password !== req.body.password){
+
+                requestResult.loginSuccessful = false;
+                requestResult.errorMessage = 'Invalid login or password.';
+            }else{
+
+                requestResult.loginSuccessful = true;
+            }
+
+            res.send(requestResult);
+        }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    getUserGames(req, res){
+
+        const user = req.query.user;
+
+        this.getMainController().getDatabaseUserDataPromise(user).then(function(data){
+
+            res.send(data[0].games);
+        }).catch(function(error){
+
+            console.log(error);
+        });
     }
     /**
      * Returns main controller of server side.

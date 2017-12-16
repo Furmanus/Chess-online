@@ -8,6 +8,7 @@ const MongoDb = require('./helper/database');
 
 const http = require('http');
 const express = require('express');
+const ejs = require('ejs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -66,7 +67,6 @@ class Server{
         this.initializeExpressApplication();
         this.initializeServer();
         this.createSocketManager(this.getServer(), io);
-        //TODO naprawic zjebany singleton routera
         this.getRouter().addSocketManager(this.getSocketManager());
 
         this.startListening();
@@ -88,9 +88,11 @@ class Server{
         this.getApp().use(bodyParser.urlencoded({extended: true}));
         this.getApp().use(bodyParser.json());
         this.getApp().use(cookieParser());
-        this.getApp().use('/', express.static(path.join(__dirname, '../client')));
+        this.getApp().use(express.static(path.join(__dirname, '../client')));
         this.getApp().use(this.getRouter().getRouterObject());
         this.getApp().set('port', process.env.PORT || 3000);
+        this.getApp().set('views', __dirname + '/../client');
+        this.getApp().engine('html', ejs.renderFile);
     }
 
     /**

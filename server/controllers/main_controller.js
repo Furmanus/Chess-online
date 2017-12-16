@@ -6,10 +6,12 @@ const boardControllerClass = require('./board_controller');
 const GameModel = require('./../models/game_model');
 const Observer = require('./../../core/observer');
 const ColourEnums = require('./../../enums/colours');
+const DatabaseConnection = require('./../helper/database');
 
 //private variables declaration
 const boardController = Symbol();
 const gameModel = Symbol();
+const databaseConnection = Symbol();
 
 /**
  * @class
@@ -26,6 +28,8 @@ class MainController extends Observer{
         this[boardController] = new boardControllerClass();
         /**@type {GameModel}*/
         this[gameModel] = new GameModel();
+        /**@type {DatabaseConnection}*/
+        this[databaseConnection] = new DatabaseConnection();
     }
     /**
      * Returns board controller.
@@ -42,6 +46,14 @@ class MainController extends Observer{
     getGameModel(){
 
         return this[gameModel];
+    }
+    /**
+     * Returns database connection object.
+     * @returns {DatabaseConnection}
+     */
+    getDatabaseConnection(){
+
+        return this[databaseConnection];
     }
     /**
      * Changes active player in game model.
@@ -166,6 +178,15 @@ class MainController extends Observer{
     getFigureCapturedLastTurn(){
 
         return this.getBoardController().getFigureCapturedLastTurn();
+    }
+    /**
+     * Method which for given user login makes query to database for that login. Returns promise, which resolved returns user data from database.
+     * @param {string}  userLogin
+     * @returns {Promise<T>}
+     */
+    getDatabaseUserDataPromise(userLogin){
+
+        return this.getDatabaseConnection().findUserByName(userLogin);
     }
 }
 
