@@ -2,31 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="./styles/board.css">
-    <link rel="stylesheet" type="text/css" href="./styles/cell.css">
-    <link rel="stylesheet" type="text/css" href="./styles/figure.css">
-    <link rel="stylesheet" type="text/css" href="./styles/panel.css">
     <title>Battle Chess</title>
+    <link rel="stylesheet" type="text/css" href="./styles/login.css">
+    <link rel="stylesheet" type="text/css" href="./styles/loader.css">
 </head>
 <body>
-    <div class="header">
-
-    </div>
     <div class="main">
-        <div class="main-board">
-            <div id="board"></div>
-        </div>
-        <div class="main-side">
-            <div id="panel" class="panel scrollbar">
-                <ul class="messages">
-                </ul>
+        <div class="form-container center">
+            <div class="loader-container center hidden">
+                <div class="loader"></div>
+                <p>loading data...</p>
             </div>
+            <form class="center" method="post" action="/login_form">
+                <p class="space-down">User login:</p>
+                <input name="login" class="input-text" type="text" placeholder="enter login">
+                <p class="error-text" id="error"></p>
+                <p class="space-down">Password:</p>
+                <input name="password" class="input-text gap-down" type="password" placeholder="enter password"><br>
+                <input class="space-down button horizontal-center" id="submit" type="button" value="submit"><br>
+                <input class="space-down button horizontal-center" id="register" type="button" value="register">
+            </form>
         </div>
     </div>
-    <div class="footer">
-
-    </div>
-    <script src = "/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="scripts/game.bundle.js"></script>
+    <script type="text/javascript" src="./scripts/login.bundle.js"></script>
 </body>
 </html>

@@ -13,9 +13,10 @@ let EventEnums = {
     //SERVER EVENTS
     SEND_SERVER_GAME_STATUS_READY: 'server:players_ready',
     CLIENT_DISCONNECTED: 'client:disconnected',
-    //SERVER TO CLIENT EVENTS
+    //SERVER TO CLIENT EVENTS ROUTES
     BOTH_PLAYERS_READY: 'server_client:ready',
-    PLAYER_MOVED: 'player:moved'
+    PLAYER_MOVED: 'player:moved',
+    LOGIN_DATA_VALIDATION: 'login:validate'
 };
 
 module.exports = EventEnums;

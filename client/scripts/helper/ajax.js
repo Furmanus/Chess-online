@@ -62,23 +62,26 @@ class Ajax{
 
     /**
      * Method responsible for sending AJAX GET request at certain url.
-     * @param   {string}    url         URL adress where data should be send.
-     * @param   {Object}    data        Data object to send.
-     * @param   {function}  onProgress  Callback on progress function.
+     * @param   {string}    url             URL adress where data should be send.
+     * @param   {Object}    data            Data object to send.
+     * @param   {boolean}   jsonResponse    Boolean value indicating whether response should be parsed to JSON
+     * @param   {function}  onProgress      Callback on progress function.
      */
-    static get(url, data, onProgress){
+    static get(url, data, jsonResponse, onProgress){
 
         return new Promise(function(resolve, reject){
 
             const ajax = new XMLHttpRequest();
             const path = `${url}?${buildQueryString(data)}`;
+            let response;
 
             ajax.open('GET', path, true);
 
             ajax.onprogress = onProgress;
             ajax.onload = function(){
 
-                resolve(JSON.parse(ajax.response));
+                response = jsonResponse ? JSON.parse(ajax.response) : ajax.response;
+                resolve(response);
             };
             ajax.onerror = function(){
 
