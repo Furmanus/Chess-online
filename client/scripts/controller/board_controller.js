@@ -119,7 +119,7 @@ class BoardController extends Observer{
 
         return new Promise(function(resolve, reject){
 
-            Ajax.get('/board_state', {}).then(function(data){
+            Ajax.get('/board_state', {}, true).then(function(data){
 
                 resolve(data);
             }).catch(function(reason){

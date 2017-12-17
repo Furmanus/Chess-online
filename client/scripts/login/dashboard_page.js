@@ -10,6 +10,7 @@ const user = Symbol();
 const loaderElement = Symbol();
 const mainPageElement = Symbol();
 const serverMessagesElement = Symbol();
+const logoutInputElement = Symbol();
 
 /**
  * @class
@@ -32,12 +33,22 @@ class DashboardPage extends Page{
         this[mainPageElement] = document.querySelector('main');
         /**@type {HTMLElement*/
         this[serverMessagesElement] = document.querySelector('.available_games h3');
+        /**@type {HTMLInputElement}*/
+        this[logoutInputElement] = document.getElementById('logout');
 
         this.initialize();
+        this.attachEvents();
     }
     initialize(){
 
         this.getGamesFromServer();
+    }
+    /**
+     * Method responsible for attaching events for dashboard page html elements.
+     */
+    attachEvents(){
+
+        this[logoutInputElement].addEventListener('click', this.logout);
     }
     /**
      * Method responsible for retrieving user name from page url query.
@@ -56,8 +67,11 @@ class DashboardPage extends Page{
     addItemToGamesList(element){
 
         const li = document.createElement('li');
+        const a = document.createElement('a');
 
-        li.innerText = element.data;
+        a.href = '/game';
+        a.innerText = element.data;
+        li.appendChild(a);
         this[gamesListElement].appendChild(li);
     }
     /**
@@ -87,6 +101,13 @@ class DashboardPage extends Page{
 
             hideLoader();
         });
+    }
+    /**
+     * Method responsible for logging user out.
+     */
+    logout(){
+
+        window.location = '/';
     }
     /**
      * Method responsible for showing loader during asynchronous data fetching.

@@ -76,11 +76,12 @@ class LoginPage extends Page{
             if(!data.loginSuccessful){
 
                 error.textContent = data.errorMessage;
-                hideLoader();
             }else{
 
-                window.location.href = './../dashboard.html?user=' + login;
+                window.location = `/dashboard?user=${login}`;
             }
+
+            hideLoader();
         });
     }
 
