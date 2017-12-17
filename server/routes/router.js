@@ -34,6 +34,7 @@ class Router{
         this.getInitialPlayerData = this.getInitialPlayerData.bind(this);
         this.playerLoginHandler = this.playerLoginHandler.bind(this);
         this.getUserGames = this.getUserGames.bind(this);
+        this.dashboardPage = this.dashboardPage.bind(this);
 
         this.initializePaths();
     }
@@ -43,11 +44,16 @@ class Router{
     }
     initializePaths(){
         //TODO zamienić ścieżki na enumy
+        this.getRouterObject().get('/', function(req, res){
+            res.render('login');
+        });
+        this.getRouterObject().get('/dashboard', this.dashboardPage);
         this.getRouterObject().get('/board_state', this.getBoardState);
         this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler);
         this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData);
         this.getRouterObject().post('/login_form_validate', this.playerLoginHandler);
         this.getRouterObject().get('/games', this.getUserGames);
+        this.getRouterObject().get('/game', this.gamePage);
     }
     /**
      * Callback function which takes from game model initial player data and sends it back in response.
@@ -73,6 +79,14 @@ class Router{
     getBoardState(req, res){
 
         res.json(this.getMainController().getBoardState());
+    }
+    dashboardPage(req, res){
+
+        res.render('dashboard', {user: req.query.user});
+    }
+    gamePage(req, res){
+
+        res.render('board');
     }
     /**
      * Callback function for '/figure_moves' POST request. Checks whether any figure is currently selected by player, and if yes, send to client array of possible moves.

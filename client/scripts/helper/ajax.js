@@ -32,7 +32,8 @@ class Ajax{
      * @param   {string}    url             URL adress where data should be send.
      * @param   {Object}    data            Data object to send.
      * @param   {function}  onProgress      Callback on progress function.
-     * @param   {boolean}   isJsonRequest   Parameter determining whether requests content-type should be 'application/json'. If set to false, it will be 'application/x-www-form-urlencoded'. By default set to true.
+     * @param   {boolean}   isJsonRequest   Parameter determining whether requests content-type should be 'application/json'. If set to false, it will
+     *                                      be 'application/x-www-form-urlencoded'. By default set to true.
      */
     static post(url, data,  onProgress, isJsonRequest = true){
 

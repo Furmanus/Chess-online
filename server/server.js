@@ -8,10 +8,9 @@ const MongoDb = require('./helper/database');
 
 const http = require('http');
 const express = require('express');
-const ejs = require('ejs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const session = require('express-session');
+const session = require('client-sessions');
 const path = require('path');
 const io = require('socket.io');
 const MainController = require('./controllers/main_controller');
@@ -89,14 +88,20 @@ class Server{
         this.getApp().use(bodyParser.json());
         this.getApp().use(cookieParser());
         this.getApp().use(express.static(path.join(__dirname, '../client')));
+        this.getApp().use(session({
+            cookieName: 'session',
+            secret: 'dggeSR-12Ra',
+            duration: 1000*60*20,
+            activeDuration: 1000*60*10
+        }));
         this.getApp().use(this.getRouter().getRouterObject());
         this.getApp().set('port', process.env.PORT || 3000);
-        this.getApp().set('views', __dirname + '/../client');
-        this.getApp().engine('html', ejs.renderFile);
+        this.getApp().set('view engine', 'pug');
+        this.getApp().set('views','./client/views');
     }
 
     /**
-     * TODO uzupelnic
+     * Creates helper object responsible for managing sockets.
      * @param {Object}  server      Server instance.
      * @param {Object}  socketIo    SocketIO connection instance.
      */

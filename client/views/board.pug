@@ -1,0 +1,20 @@
+doctype html
+html
+    head
+        meta(charset="UTF-8")
+        link(rel="stylesheet" type="text/css" href="./../styles/board.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/cell.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/figure.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/panel.css")
+        title Battle Chess
+    body
+        div.header
+        div.main
+            div.main-board
+                div#board
+            div.main-side
+                div#panel.panel.scrollbar
+                    ul.messages
+        div.footer
+        script(src = "/socket.io/socket.io.js")
+        script(type="text/javascript" src="scripts/game.bundle.js")
