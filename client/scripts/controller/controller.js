@@ -69,6 +69,8 @@ class MainController extends Observer{
 
         Ajax.post('/initial_player_data', {id: socketId}).then(function(data){
 
+            Ajax.validateAjaxResponseRedirect(data);
+
             this.getGameModel().setPlayerColour(data.colour);
 
             if(data.colour === ColourEnums.WHITE){

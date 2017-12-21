@@ -48,7 +48,7 @@ class DashboardPage extends Page{
      */
     attachEvents(){
 
-        this[logoutInputElement].addEventListener('click', this.logout);
+        this[logoutInputElement].addEventListener('click', this.logout.bind(this));
     }
     /**
      * Method responsible for retrieving user name from page url query.
@@ -88,6 +88,8 @@ class DashboardPage extends Page{
 
         Ajax.get('/games', {user}, true).then(function(data){
 
+            Ajax.validateAjaxResponseRedirect(data);
+
             if(data.length) {
 
                 data.forEach(function (element) {
@@ -107,7 +109,12 @@ class DashboardPage extends Page{
      */
     logout(){
 
-        window.location = '/';
+        const user = this.getUser();
+
+        Ajax.get('/logout', {user}, true).then(function(data){
+
+            Ajax.validateAjaxResponseRedirect(data);
+        });
     }
     /**
      * Method responsible for showing loader during asynchronous data fetching.

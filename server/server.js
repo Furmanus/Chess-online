@@ -10,11 +10,11 @@ const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const session = require('client-sessions');
 const path = require('path');
 const io = require('socket.io');
 const MainController = require('./controllers/main_controller');
 const EventEnums = require('./../enums/events');
+const SessionManager = require('./helper/session_manager');
 
 //declaration of private variables
 const server = Symbol();
@@ -23,6 +23,7 @@ const socketManager = Symbol();
 const mainController = Symbol();
 const router = Symbol();
 const databaseConnection = Symbol();
+const sessionManager = Symbol();
 
 /**
  * @class
@@ -42,6 +43,7 @@ class Server{
         this[mainController] = undefined;
         this[router] = undefined;
         this[databaseConnection] = new MongoDb();
+        this[sessionManager] = new SessionManager();
 
         this.bothPlayersReadyEventListener = this.bothPlayersReadyEventListener.bind(this);
         this.onClientDisconnect = this.onClientDisconnect.bind(this);
@@ -75,7 +77,6 @@ class Server{
 
         this[server] = http.Server(this.getApp());
     }
-
     /**
      * Method which makes router use various middleware functions and sets routes variables.
      */
@@ -83,23 +84,17 @@ class Server{
 
         this[app] = express();
 
-        this[router] = new Router(this.getMainController())
+        this[router] = new Router(this.getMainController(), this.getSessionManager())
         this.getApp().use(bodyParser.urlencoded({extended: true}));
         this.getApp().use(bodyParser.json());
-        this.getApp().use(cookieParser());
+        this.getApp().use(cookieParser('sfsergxxz@#$%r2'));
+        this.getApp().use(this.getSessionManager().getSession());
         this.getApp().use(express.static(path.join(__dirname, '../client')));
-        this.getApp().use(session({
-            cookieName: 'session',
-            secret: 'dggeSR-12Ra',
-            duration: 1000*60*20,
-            activeDuration: 1000*60*10
-        }));
         this.getApp().use(this.getRouter().getRouterObject());
         this.getApp().set('port', process.env.PORT || 3000);
         this.getApp().set('view engine', 'pug');
         this.getApp().set('views','./client/views');
     }
-
     /**
      * Creates helper object responsible for managing sockets.
      * @param {Object}  server      Server instance.
@@ -177,6 +172,14 @@ class Server{
     getRouter(){
 
         return this[router];
+    }
+    /**
+     * Returns session manager object.
+     * @returns {SessionManager}
+     */
+    getSessionManager(){
+
+        return this[sessionManager];
     }
 }
 
