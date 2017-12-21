@@ -11,6 +11,7 @@ const path = require('path');
 
 const mainController = Symbol();
 const socketManager = Symbol();
+const sessionManager = Symbol();
 const router = Symbol();
 
 /**
@@ -20,21 +21,17 @@ class Router{
     /**
      * Constructor for router class.
      * @param {MainController}  mainControllerObject
+     * @param {SessionManager}  sessionManagerObject
      * @return {Router}
      */
-    constructor(mainControllerObject){
+    constructor(mainControllerObject, sessionManagerObject){
 
         /**@type {MainController}*/
         this[mainController] = mainControllerObject;
+        /**@type {SessionManager}*/
+        this[sessionManager] = sessionManagerObject;
         /**@type {Object}*/
         this[router] = express.Router();
-
-        this.getBoardState = this.getBoardState.bind(this);
-        this.boardClickRequestHandler = this.boardClickRequestHandler.bind(this);
-        this.getInitialPlayerData = this.getInitialPlayerData.bind(this);
-        this.playerLoginHandler = this.playerLoginHandler.bind(this);
-        this.getUserGames = this.getUserGames.bind(this);
-        this.dashboardPage = this.dashboardPage.bind(this);
 
         this.initializePaths();
     }
@@ -44,16 +41,35 @@ class Router{
     }
     initializePaths(){
         //TODO zamienić ścieżki na enumy
-        this.getRouterObject().get('/', function(req, res){
+        this.getRouterObject().get('/', this.mainLoginPage.bind(this));
+        this.getRouterObject().post('/login_form_validate', this.playerLoginHandler.bind(this));
+        this.getRouterObject().get('/logout', this.logoutUser.bind(this));
+        this.getRouterObject().get('/game', this.gamePage.bind(this));
+        this.getRouterObject().all('*', this.isUserLoggedIn.bind(this));
+        this.getRouterObject().get('/dashboard', this.dashboardPage.bind(this));
+        this.getRouterObject().get('/board_state', this.getBoardState.bind(this));
+        this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler.bind(this));
+        this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData.bind(this));
+        this.getRouterObject().get('/games', this.getUserGames.bind(this));
+    }
+    /**
+     * Callback function for '/' GET route. Checks if user is already logged in and if he is, redirects him to dashboard. Renders login page otherwise.
+     * @param req
+     * @param res
+     */
+    mainLoginPage(req, res){
+
+        const user = req.session.user;
+        const userId = req.sessionID;
+
+        if(req.session.user && this.getSessionManager().isUserLogged(user) && this.getSessionManager().getUserSessionId(user) === userId){
+
+            req.session.touch(userId);
+            res.redirect(`/dashboard?user=${user}`);
+        }else {
+
             res.render('login');
-        });
-        this.getRouterObject().get('/dashboard', this.dashboardPage);
-        this.getRouterObject().get('/board_state', this.getBoardState);
-        this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler);
-        this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData);
-        this.getRouterObject().post('/login_form_validate', this.playerLoginHandler);
-        this.getRouterObject().get('/games', this.getUserGames);
-        this.getRouterObject().get('/game', this.gamePage);
+        }
     }
     /**
      * Callback function which takes from game model initial player data and sends it back in response.
@@ -80,13 +96,38 @@ class Router{
 
         res.json(this.getMainController().getBoardState());
     }
+    /**
+     * Callback function for '/dashboard' GET route. Renders dashboard page.
+     * @param req
+     * @param res
+     */
     dashboardPage(req, res){
 
+        req.session.touch(req.sessionID);
         res.render('dashboard', {user: req.query.user});
     }
+    /**
+     * Callback function for '/game' GET route. Renders page with game board.
+     * @param req
+     * @param res
+     */
     gamePage(req, res){
 
+        req.session.touch(req.sessionID);
         res.render('board');
+    }
+    /**
+     * Callback function for '/logout' GET route. Destroys session, removes user from logged users and redirects user to login page.
+     * @param req
+     * @param res
+     */
+    logoutUser(req, res){
+
+        req.session.destroy(function(){
+
+            this.getSessionManager().removeUser(req.query.user);
+            res.send({forcedRedirectUrl: '/'});
+        }.bind(this));
     }
     /**
      * Callback function for '/figure_moves' POST request. Checks whether any figure is currently selected by player, and if yes, send to client array of possible moves.
@@ -99,6 +140,8 @@ class Router{
         const coordinates = {x: parseInt(req.body.x), y: parseInt(req.body.y)};
         const colour = req.body.colour;
         const highlightedCell = this.getMainController().getCurrentlyHighlightedCell();
+
+        req.session.touch(req.sessionID);
 
         if(!highlightedCell){
 
@@ -157,6 +200,8 @@ class Router{
     }
     playerLoginHandler(req, res){
 
+        const router = this;
+
         this.getMainController().getDatabaseUserDataPromise(req.body.login).then(function(data){
 
             let requestResult = {};
@@ -167,6 +212,8 @@ class Router{
                 requestResult.errorMessage = 'Invalid login or password.';
             }else{
 
+                router.getSessionManager().getLoggedUsersMap().set(req.body.login, req.sessionID);
+                req.session.user = req.body.login;
                 requestResult.loginSuccessful = true;
             }
 
@@ -187,6 +234,25 @@ class Router{
 
             console.log(error);
         });
+    }
+    /**
+     * Middleware method for all routes, validates whether user is already logged in. If yes, next() method is called, otherwise, login page is rendered.
+     * @param req
+     * @param res
+     * @param next
+     */
+    isUserLoggedIn(req, res, next){
+
+        const user = req.session.user;
+        const userId = req.sessionID;
+
+        if(req.session.user && this.getSessionManager().isUserLogged(user) && this.getSessionManager().getUserSessionId(user) === userId){
+
+            next();
+        }else{
+
+            res.send({forcedRedirectUrl: '/'});
+        }
     }
     /**
      * Returns main controller of server side.
@@ -211,6 +277,14 @@ class Router{
     getRouterObject(){
 
         return this[router];
+    }
+    /**
+     * Returns instance of session manager.
+     * @returns {SessionManager}
+     */
+    getSessionManager(){
+
+        return this[sessionManager];
     }
 }
 

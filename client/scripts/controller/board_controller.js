@@ -121,6 +121,8 @@ class BoardController extends Observer{
 
             Ajax.get('/board_state', {}, true).then(function(data){
 
+                Ajax.validateAjaxResponseRedirect(data);
+
                 resolve(data);
             }).catch(function(reason){
 

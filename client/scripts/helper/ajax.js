@@ -26,7 +26,6 @@ function buildQueryString(object){
  * @class
  */
 class Ajax{
-
     /**
      * Method responsible for sending AJAX POST request at certain url.
      * @param   {string}    url             URL adress where data should be send.
@@ -60,7 +59,6 @@ class Ajax{
             ajax.send(data);
         });
     }
-
     /**
      * Method responsible for sending AJAX GET request at certain url.
      * @param   {string}    url             URL adress where data should be send.
@@ -91,6 +89,14 @@ class Ajax{
 
             ajax.send();
         });
+    }
+
+    static validateAjaxResponseRedirect(responseData){
+
+        if(responseData.forcedRedirectUrl){
+
+            window.location = responseData.forcedRedirectUrl.toString();
+        }
     }
 }
 
