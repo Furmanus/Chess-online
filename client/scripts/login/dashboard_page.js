@@ -11,6 +11,7 @@ const loaderElement = Symbol();
 const mainPageElement = Symbol();
 const serverMessagesElement = Symbol();
 const logoutInputElement = Symbol();
+const createInputElement = Symbol();
 
 /**
  * @class
@@ -35,6 +36,8 @@ class DashboardPage extends Page{
         this[serverMessagesElement] = document.querySelector('.available_games h3');
         /**@type {HTMLInputElement}*/
         this[logoutInputElement] = document.getElementById('logout');
+        /**@type {HTMLInputElement}*/
+        this[createInputElement] = document.getElementById('create');
 
         this.initialize();
         this.attachEvents();
@@ -96,6 +99,11 @@ class DashboardPage extends Page{
 
                     dashBoardPageObject.addItemToGamesList(element);
                 });
+
+                if(data.length > 3){
+
+                    dashBoardPageObject[createInputElement].disabled = true;
+                }
             }else{
 
                 showServerMessage('Seems you have no ongoing games.')

@@ -12,10 +12,12 @@ html
                 div.info-bar
                     div.info
                         p You are logged in as <b>#{user}</b>
-                        input(type="button" id="logout" value="logout")
+                        input(class="button" type="button" id="logout" value="logout")
                 hr
             div.available_games
                 h2 List of available games:
                 ul
                 h3.server_messages
+            div.buttons
+                input(class="create-button" type="button" id="create" value="create game")
         script(type="text/javascript" src="./../scripts/dashboard.bundle.js")

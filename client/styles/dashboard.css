@@ -32,8 +32,7 @@ main{
     display: inline-block;
     margin: auto 5px;
 }
-.info-bar input{
-    float: right;
+.button{
     border: 1px solid black;
     border-radius: 5px;
     min-width: fit-content;
@@ -42,11 +41,27 @@ main{
     text-align: center;
     box-shadow: 0 1px #666666;
 }
-.info-bar input:hover{
+.button:hover{
     background-color: bisque;
     transition: background-color 0.3s;
 }
-.info-bar input:active{
+.button:active{
+    transform: translateY(2px);
+}
+.create-button{
+    text-align: center;
+    min-height: 24px;
+    border-radius: 12px;
+    background-color: cornsilk;
+    border: 1px solid black;
+    box-shadow: 0 3px #666666;
+    outline: none;
+}
+.create-button:hover{
+    background-color: bisque;
+    transition: background-color 0.3s;
+}
+.create-button:active{
     transform: translateY(2px);
 }
 hr{
@@ -92,4 +107,8 @@ hr{
 .available_games ul li:hover{
     box-shadow: 6px 6px grey;
     background-color: #E4DAAE;
+}
+.buttons{
+    width: 100%;
+    text-align: center;
 }
