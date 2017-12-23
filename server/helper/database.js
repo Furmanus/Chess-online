@@ -2,7 +2,8 @@
  * @author Lukasz Lach
  */
 
-const MongoClient = require('mongodb').MongoClient;
+const mongo = require('mongodb');
+const MongoClient = mongo.MongoClient;
 const DatabaseEnums = require('./../../enums/database_enums');
 const databaseUrl = 'mongodb://chessadmin:chessadmin@ds129906.mlab.com:29906/chess';
 
@@ -15,7 +16,6 @@ const database = Symbol();
 class DatabaseConnection{
 
     constructor(){
-
     }
     /**
      * Method responsible for inserting new user data into database.
@@ -51,6 +51,100 @@ class DatabaseConnection{
 
             return db.collection(DatabaseEnums.USERS).find({user}).toArray();
         });
+    }
+    /**
+     * Method responsible for inserting into database new game document.
+     * @param {string}  startingPlayer          Name of starting player.
+     * @param {Object}  serializedBoardModel    JSON data about game board state.
+     * @returns {Promise}   Returns promise. Resolved promise contains data about inserted document.
+     */
+    insertNewGame(startingPlayer, serializedBoardModel){
+
+        const databaseDocument = {
+
+            white: startingPlayer,
+            black: null,
+            boardData: serializedBoardModel,
+            activePlayer: 'white',
+            hasEnded: false
+        }
+
+        return this.makeDatabaseConnection().then(function(db){
+
+            return db.collection(DatabaseEnums.GAMES).insertOne(databaseDocument);
+        }).catch(function(error){
+
+            console.log(error);
+        })
+    }
+    /**
+     * Method responsible for obtaining game data from database by game id.
+     * @param {string}  gameId  Unique game identifier from database.
+     * @returns {Promise}   Returns promise. Resolved promise contains game data.
+     */
+    getGameDataById(gameId){
+
+        const ObjectID = mongo.ObjectID
+
+        return this.makeDatabaseConnection().then(function(db){
+
+            return db.collection(DatabaseEnums.GAMES).findOne({_id: new ObjectID(gameId)});
+        }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    /**
+     * Method responsible for updating in database game data of certain Id.
+     * @param {string}          gameId                  Unique ID in database of game to update. Required parameter.
+     * @param {string|null}     activePlayer            Colour of active player (white or black). Optional parameter.
+     * @param {Object|null}     serializedBoardModel    Object with new game board data. Optional parameter.
+     * @param {string|null}     blackPlayer             Name of second (black) player. Optional parameter.
+     * @param {boolean|null}    hasEnded                Boolean variable indicating whether game has ended or not.
+     * @returns {Promise}                               Returns promise. Resolved promise contains data about connection to database.
+     */
+    updateGameData(gameId, activePlayer, serializedBoardModel, blackPlayer, hasEnded){
+
+        const databaseObject = this;
+        const ObjectID = mongo.ObjectID;
+
+        return this.getGameData(gameId).then(function(currentGameData){
+
+            const newGameData = {
+
+                black: blackPlayer ? blackPlayer : currentGameData.black,
+                boardData: serializedBoardModel ? serializedBoardModel : currentGameData.boardData,
+                activePlayer: activePlayer ? activePlayer : currentGameData.activePlayer,
+                hasEnded: hasEnded ? hasEnded : currentGameData.hasEnded
+            }
+
+            return databaseObject.makeDatabaseConnection().then(function(db){
+
+                return db.collection(DatabaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData);
+            }).catch(function(error){
+
+                console.log(error);
+            });
+        }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    changeActivePlayerInGame(gameId, activePlayer){
+
+        return this.updateGameData(gameId, activePlayer);
+    }
+    changeBoardDataModelInGame(gameId, serializedBoardModel){
+
+        return this.updateGameData(gameId, null, serializedBoardModel);
+    }
+    changeBlackPlayerNameInGame(gameId, blackPlayer){
+
+        return this.updateGameData(gameId, null, null, blackPlayer);
+    }
+    endGame(gameId){
+
+        return this.updateGameData(gameId, null, null, null, true);
     }
     /**
      * Helper method responsible for making connection to database.

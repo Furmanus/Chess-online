@@ -3,7 +3,8 @@
 /**@typedef DatabaseEnums*/
 let DatabaseEnums = {
 
-    USERS: 'users'
+    USERS: 'users',
+    GAMES: 'games'
 };
 
 module.exports = DatabaseEnums;
