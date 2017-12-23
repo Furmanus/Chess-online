@@ -24,7 +24,7 @@ class SessionManager{
             saveUninitialized: true,
             path: '/',
             cookie: {
-                maxAge: 1000000,
+                maxAge: 100000000000,
                 secure: false
             }
         };
