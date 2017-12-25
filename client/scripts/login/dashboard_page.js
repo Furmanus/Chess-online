@@ -4,6 +4,7 @@
 
 import Ajax from './../helper/ajax';
 import Page from './page';
+import Templates from './../templates/templates';
 
 const gamesListElement = Symbol();
 const user = Symbol();
@@ -52,6 +53,7 @@ class DashboardPage extends Page{
     attachEvents(){
 
         this[logoutInputElement].addEventListener('click', this.logout.bind(this));
+        this[createInputElement].addEventListener('click', this.createNewGame.bind(this));
     }
     /**
      * Method responsible for retrieving user name from page url query.
@@ -67,14 +69,11 @@ class DashboardPage extends Page{
      * Method responsible for creating new HTML li element, adding content to it and appending to games list.
      * @param {Object]  element
      */
-    addItemToGamesList(element){
+    addItemToGamesList(data){
 
         const li = document.createElement('li');
-        const a = document.createElement('a');
+        li.innerHTML = Templates.getDashboardGameListElement(data);
 
-        a.href = '/game';
-        a.innerText = element.data;
-        li.appendChild(a);
         this[gamesListElement].appendChild(li);
     }
     /**
@@ -122,6 +121,24 @@ class DashboardPage extends Page{
         Ajax.get('/logout', {user}, true).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
+        });
+    }
+    /**
+     * Method responsible for creating new game.
+     */
+    createNewGame(){
+
+        const user = this.getUser();
+        const dashboardPageObject = this;
+        let newListElement;
+
+        Ajax.post('/create_game', {user}).then(function(data){
+
+            Ajax.validateAjaxResponseRedirect(data);
+            dashboardPageObject.addItemToGamesList(data);
+        }).catch(function(error){
+
+            console.log(error);
         });
     }
     /**

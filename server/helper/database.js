@@ -16,6 +16,8 @@ const database = Symbol();
 class DatabaseConnection{
 
     constructor(){
+
+        //this.insertNewUser('ania', '46');
     }
     /**
      * Method responsible for inserting new user data into database.
@@ -51,6 +53,37 @@ class DatabaseConnection{
 
             return db.collection(DatabaseEnums.USERS).find({user}).toArray();
         });
+    }
+    /**
+     * Method responsible for adding game id to certain user games list array.
+     * @param {string}  user    Name of user.
+     * @param {string}  gameId  Unique game id from database.
+     * @returns {Promise}
+     */
+    addGameToUserGames(user, gameId){
+
+        const databaseConnectionObject = this;
+        let userData = {};
+
+        return this.findUserByName(user).then(function(data){
+
+            data[0].games.push(gameId);
+
+            userData.user = data[0].user;
+            userData.password = data[0].password;
+            userData.games = data[0].games;
+
+            return databaseConnectionObject.makeDatabaseConnection().then(function(db){
+
+                return db.collection(DatabaseEnums.USERS).updateOne({user}, userData);
+            }).catch(function(error){
+
+                console.log(error);
+            })
+        }).catch(function(error){
+
+            console.log(error);
+        })
     }
     /**
      * Method responsible for inserting into database new game document.
@@ -93,6 +126,20 @@ class DatabaseConnection{
 
             console.log(error);
         });
+    }
+    /**
+     * Method responsible for getting all registered active games.
+     * @returns {Promise<any>}  Returns promise. Fulfilled promise contains games data.
+     */
+    getAllGamesData(){
+
+        return this.makeDatabaseConnection().then(function(db){
+
+            return db.collection(DatabaseEnums.GAMES).find({}).toArray();
+        }).catch(function(error){
+
+            console.log(error);
+        })
     }
     /**
      * Method responsible for updating in database game data of certain Id.
