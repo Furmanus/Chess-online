@@ -112,3 +112,11 @@ hr{
     width: 100%;
     text-align: center;
 }
+li a{
+    text-decoration: none;
+}
+.dashboard-list-item{
+    font-size: 12px;
+    text-align: left;
+    color: black;
+}

@@ -47,6 +47,7 @@ class Router{
         this.getRouterObject().get('/game', this.gamePage.bind(this));
         this.getRouterObject().all('*', this.isUserLoggedIn.bind(this));
         this.getRouterObject().get('/dashboard', this.dashboardPage.bind(this));
+        this.getRouterObject().post('/create_game', this.createGame.bind(this));
         this.getRouterObject().get('/board_state', this.getBoardState.bind(this));
         this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler.bind(this));
         this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData.bind(this));
@@ -70,6 +71,33 @@ class Router{
 
             res.render('login');
         }
+    }
+    /**
+     * Callback function for '/create_game' POST route.
+     * @param req
+     * @param res
+     */
+    createGame(req, res){
+
+        const user = req.body.user;
+        const thisRouter = this;
+        let createdGameId;
+
+        this.getMainController().createNewGame(user).then(function(data){
+
+            createdGameId = data.ops[0]._id;
+
+            thisRouter.getMainController().addGameToUser(user, createdGameId).then(function(){
+
+                res.send(data.ops[0]);
+            }).catch(function(error){
+
+                console.log(error);
+            });
+        }).catch(function(error){
+
+            console.log(error);
+        });
     }
     /**
      * Callback function which takes from game model initial player data and sends it back in response.
@@ -223,13 +251,53 @@ class Router{
             console.log(error);
         });
     }
+    /**
+     * Callback function for '/games' GET route. Method responsible for taking from database data about all user active games.
+     * This happens in two steps - in first step we connect to database and get list of user active games ID's. In next step we take data off all active
+     * games in database and filter them by ID's of players active games. Result is send to client in response.
+     * @param req
+     * @param res
+     */
     getUserGames(req, res){
 
         const user = req.query.user;
+        const routerObject = this;
+        let gamesList;
+        let comparisionResult;
+        let filteredList;
 
         this.getMainController().getDatabaseUserDataPromise(user).then(function(data){
 
-            res.send(data[0].games);
+            gamesList = data[0].games;
+
+            routerObject.getMainController().getAllGamesData().then(function(gamesListData){
+
+                gamesListData.forEach(function(item){
+
+                    delete item.boardData;
+                });
+
+                filteredList = gamesListData.filter(function(item){
+
+                    comparisionResult = false;
+
+                    for(let playerGameData of gamesList){
+
+                        if(playerGameData.toString() === item._id.toString()){
+
+                            comparisionResult = true;
+                            break;
+                        }
+                    }
+
+                    return comparisionResult;
+                });
+
+                res.send(filteredList);
+            }).catch(function(error){
+
+                console.log(error);
+            });
         }).catch(function(error){
 
             console.log(error);

@@ -7,6 +7,7 @@ const GameModel = require('./../models/game_model');
 const Observer = require('./../../core/observer');
 const ColourEnums = require('./../../enums/colours');
 const DatabaseConnection = require('./../helper/database');
+const BoardHelper = require('./../helper/board_helper');
 
 //private variables declaration
 const boardController = Symbol();
@@ -30,6 +31,35 @@ class MainController extends Observer{
         this[gameModel] = new GameModel();
         /**@type {DatabaseConnection}*/
         this[databaseConnection] = new DatabaseConnection();
+    }
+    /**
+     * Method responsible for creating new game in database.
+     * @param {string}  userName
+     * @returns {Promise}   Returns promise. Resolved promise contains information about created document in database.
+     */
+    createNewGame(username){
+
+        const initialBoardData = BoardHelper.createInitialGameData();
+
+        return this.getDatabaseConnection().insertNewGame(username, initialBoardData);
+    }
+    /**
+     * Method responsible for adding new game information (its unique id) to certain user game list array in database.
+     * @param {string}  username    Name of user
+     * @param {string}  id          Game ID from database
+     * @returns {Promise}
+     */
+    addGameToUser(username, id){
+
+        return this.getDatabaseConnection().addGameToUserGames(username, id);
+    }
+    /**
+     * Method responsible for getting all registered active games from database.
+     * @returns {Promise<any>}
+     */
+    getAllGamesData(){
+
+        return this.getDatabaseConnection().getAllGamesData();
     }
     /**
      * Returns board controller.
