@@ -21,6 +21,51 @@ class Page{
         this.removeClass(element, 'hidden');
     }
     /**
+     * Method responsible for disabling HTML element.
+     * @param {HTMLElement} element
+     */
+    disableElement(element){
+
+        element.setAttribute('disabled', 'disabled');
+    }
+    /**
+     * Method responsible for enabling HTML element.
+     * @param {HTMLElement} element
+     */
+    enableElement(element){
+
+        if(element.hasAttribute('disabled')) {
+
+            element.removeAttribute('disabled');
+        }
+    }
+    /**
+     * Method responsible for disabling buttons on page. Can be overriden in certain pages objects.
+     */
+    disableButtons(){
+
+        const buttons = document.querySelectorAll('input[type=button]');
+        const pageObject = this;
+
+        buttons.forEach(function(buttonItem){
+
+            pageObject.disableElement(buttonItem);
+        });
+    }
+    /**
+     * Method responsible for enabling buttons on page. Can be overriden in certain pages objects.
+     */
+    enableButtons(){
+
+        const buttons = document.querySelectorAll('input[type=button]');
+        const pageObject = this;
+
+        buttons.forEach(function(buttonItem){
+
+            pageObject.enableElement(buttonItem);
+        });
+    }
+    /**
      * Method responsible for adding class to HTML element classlist.
      * @param {HTMLElement} element
      * @param {string}      className

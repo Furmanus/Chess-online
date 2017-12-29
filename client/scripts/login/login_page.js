@@ -13,9 +13,9 @@ const userPasswordElement = Symbol();
 const formElement = Symbol();
 const submitElement = Symbol();
 const registerElement = Symbol();
-const errorElement = Symbol();
 const loaderElement = Symbol();
 const mainElement = Symbol();
+const growlerContainer = Symbol()
 
 class LoginPage extends Page{
 
@@ -33,12 +33,12 @@ class LoginPage extends Page{
         this[submitElement] = document.getElementById('submit');
         /**@type {HTMLInputElement}*/
         this[registerElement] = document.getElementById('register');
-        /**@type {HTMLParagraphElement}*/
-        this[errorElement] = document.getElementById('error');
         /**@type {HTMLDivElement}*/
         this[loaderElement] = document.querySelector('.loader-container');
         /**@type {HTMLDivElement}*/
         this[mainElement] = document.querySelector('.main');
+        /**@type {HTMLDivElement}*/
+        this[growlerContainer] = document.querySelector('.growler-container');
 
         this.bindMethods();
         this.attachEvents();
@@ -49,6 +49,7 @@ class LoginPage extends Page{
     attachEvents(){
 
         this[submitElement].addEventListener('click', this.validateFormData);
+        this[registerElement].addEventListener('click', this.onRegisterButtonClick);
     }
     /**
      * Method responsible for binding methods defined in class to its instance.
@@ -59,6 +60,7 @@ class LoginPage extends Page{
         this.validateUserLogin = this.validateUserLogin.bind(this);
         this.showLoader = this.showLoader.bind(this);
         this.hideLoader = this.hideLoader.bind(this);
+        this.onRegisterButtonClick = this.onRegisterButtonClick.bind(this);
     }
     /**
      * Method responsible for validating form data.
@@ -67,24 +69,85 @@ class LoginPage extends Page{
 
         const login = this[userLoginElement].value;
         const password = this[userPasswordElement].value;
-        const error = this[errorElement];
         const main = this[mainElement];
         const hideLoader = this.hideLoader;
+        const loginPageObject = this;
+
+        if(this.hasError){
+
+            this.clearErrors();
+        }
+
+        this.disableButtons();
 
         Ajax.post('/login_form_validate', {login, password}, this.showLoader).then(function(data){
 
             if(!data.loginSuccessful){
 
-                error.textContent = data.errorMessage;
+                loginPageObject.showError(data.errorMessage);
             }else{
 
                 window.location = `/dashboard?user=${login}`;
             }
 
             hideLoader();
+            loginPageObject.enableButtons();
         });
     }
+    onRegisterButtonClick(){
 
+        const loginValidationResult = this.validateUserLogin();
+        const passwordValidationResult = this.validateUserPassword();
+        const loginValue = this[userLoginElement].value;
+        const passwordValue = this[userPasswordElement].value;
+        const loginPageObject = this;
+
+        if(this.hasError){
+
+            this.clearErrors();
+        }
+
+        if(loginValidationResult.result && passwordValidationResult){
+
+            this.disableButtons();
+
+            Ajax.post('/register', {user: loginValue, password: passwordValue}).then(function(data){
+
+                if(data.result){
+
+                    DomHelper.showGrowler(data.message);
+                    window.setTimeout(function(){
+
+                        window.location = `/dashboard?user=${loginValue}`;
+                    }, 1000);
+                }else{
+
+                    DomHelper.showGrowler(data.message);
+                }
+
+                loginPageObject.enableButtons();
+            }).catch(function(error){
+
+                console.log(error);
+            });
+        }else{
+
+            if(!loginValidationResult.result){
+
+                this.showError(loginValidationResult.error);
+            }
+            if(!passwordValidationResult){
+
+                this.showError('Password has to contain 3-10 characters. It has to start with letter, only letters, numbers and ' +
+                    'underscores are allowed');
+            }
+        }
+    }
+    /**
+     * Method responsible for validating user login for register action.
+     * @returns {{result: boolean, error: string}}  Returns object containing information about validation result and error message, in case where validation
+     * was not successful.
+     */
     validateUserLogin(){
         //TODO poprawic regexpy i walidację
         const login = this[userLoginElement].value;
@@ -113,6 +176,17 @@ class LoginPage extends Page{
 
             return {result: true};
         }
+    }
+    /**
+     * Method responsible for validating user password. User password need to have at least 3 and max 9 chars, at least one digit, at least one small letter
+     * and at least one capital letter.
+     * @returns {boolean}
+     */
+    validateUserPassword(){
+
+        const password = this[userPasswordElement].value;
+
+        return /^[a-zA-Z]\w{3,10}$/.test(password);
     }
     /**
      * Method responsible for showing loader on page.
@@ -163,6 +237,23 @@ class LoginPage extends Page{
 
             element.removeAttribute('disabled');
         }
+    }
+    /**
+     * Method responsible for showing error text (in growler) to user).
+     * @param {string}  errorText   Error message to show
+     */
+    showError(errorText){
+
+        this.hasError = true;
+        DomHelper.showGrowler(errorText);
+    }
+    /**
+     * Removes all growler messages from page;
+     */
+    clearErrors(){
+
+        DomHelper.removeGrowlers();
+        this.hasError = false;
     }
 }
 

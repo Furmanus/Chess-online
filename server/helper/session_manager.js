@@ -24,7 +24,7 @@ class SessionManager{
             saveUninitialized: true,
             path: '/',
             cookie: {
-                maxAge: 100000000000,
+                maxAge: 1000000,
                 secure: false
             }
         };
@@ -34,7 +34,7 @@ class SessionManager{
         this[loggedUsers] = new Map();
     }
     /**
-     * Method responsible for checking if user with certain username is logged in (has non expired session).
+     * Method responsible for checking if user with certain username is logged in (has not expired session).
      * @param   {string}    username    Name of user.
      * @returns {boolean}               Boolean variable indicating whether user is logged in or not.
      */

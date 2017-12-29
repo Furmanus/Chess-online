@@ -1,0 +1,25 @@
+.growler{
+    position: relative;
+    left: 0;
+    top: 0;
+    width: 200px;
+    min-height: 40px;
+    height: fit-content;
+    border: 1px solid black;
+    box-shadow: 2px 2px #666666;
+    border-radius: 7px;
+    background-color: tan;
+    color: black;
+    font-size: 14px;
+    text-align: justify;
+    padding: 2px;
+    word-wrap: break-word;
+    margin-bottom: 2px;
+}
+.growler-container{
+    position: fixed;
+    bottom: 5px;
+    right: 10px;
+    width: 200px;
+    min-height: 130px;
+}

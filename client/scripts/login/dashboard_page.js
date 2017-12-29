@@ -5,6 +5,7 @@
 import Ajax from './../helper/ajax';
 import Page from './page';
 import Templates from './../templates/templates';
+import DomHelper from './../helper/dom';
 
 const gamesListElement = Symbol();
 const user = Symbol();
@@ -83,8 +84,6 @@ class DashboardPage extends Page{
 
         const user = this.getUser();
         const dashBoardPageObject = this;
-        const hideLoader = this.hideLoader.bind(this);
-        const showServerMessage = this.showServerMessage.bind(this);
 
         this.showLoader();
 
@@ -99,16 +98,17 @@ class DashboardPage extends Page{
                     dashBoardPageObject.addItemToGamesList(element);
                 });
 
-                if(data.length > 3){
-
-                    dashBoardPageObject[createInputElement].disabled = true;
-                }
+                // if(data.length > 3){
+                //
+                //     dashBoardPageObject[createInputElement].disabled = true;
+                // }
+                dashBoardPageObject.validateGamesQuantity();
             }else{
 
-                showServerMessage('Seems you have no ongoing games.')
+                dashBoardPageObject.showServerMessage('Seems you have no ongoing games.')
             }
 
-            hideLoader();
+            dashBoardPageObject.hideLoader();
         });
     }
     /**
@@ -132,10 +132,18 @@ class DashboardPage extends Page{
         const dashboardPageObject = this;
         let newListElement;
 
+        this.showLoader();
+        this.disableButtons();
+
         Ajax.post('/create_game', {user}).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
             dashboardPageObject.addItemToGamesList(data);
+            dashboardPageObject.hideLoader();
+            dashboardPageObject.enableButtons();
+            dashboardPageObject.validateGamesQuantity();
+
+            DomHelper.showGrowler('Game successfully created');
         }).catch(function(error){
 
             console.log(error);
@@ -176,6 +184,34 @@ class DashboardPage extends Page{
 
         this.getServerMessagesElement().textContent = '';
     }
+    /**
+     * Method responsible for checking quantity of active games and disabling "create game" button in case if there are more than 4 active games.
+     */
+    validateGamesQuantity(){
+
+        const list = this.getGamesList().childNodes;
+
+        if(list.length > 4){
+
+            this.disableElement(this[createInputElement]);
+        }
+    }
+    /**
+     * Method responsible for disabling buttons on page.
+     */
+    // disableButtons(){
+    //
+    //     this.disableElement(this[createInputElement]);
+    //     this.disableElement(this[logoutInputElement]);
+    // }
+    /**
+     * Method responsible for enabling buttons on page.
+     */
+    // enableButtons(){
+    //
+    //     this.enableElement(this[createInputElement]);
+    //     this.enableElement(this[logoutInputElement]);
+    // }
     /**
      * Returns user name.
      * @returns {string}

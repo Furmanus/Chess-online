@@ -41,6 +41,8 @@ class Ajax{
             const ajax = new XMLHttpRequest();
             const contentType = (isJsonRequest === true) ? 'application/json' : 'application/x-www-form-urlencoded';
 
+            Object.assign(data, {isAjaxRequest: true});
+
             ajax.open('POST', url, true);
             ajax.setRequestHeader('Content-type', contentType);
 
@@ -71,7 +73,7 @@ class Ajax{
         return new Promise(function(resolve, reject){
 
             const ajax = new XMLHttpRequest();
-            const path = `${url}?${buildQueryString(data)}`;
+            const path = `${url}?${buildQueryString(Object.assign(data, {isAjaxRequest: true}))}`;
             let response;
 
             ajax.open('GET', path, true);
