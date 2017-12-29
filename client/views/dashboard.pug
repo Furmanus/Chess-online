@@ -5,6 +5,7 @@ html
         title Battle Chess
         link(rel="stylesheet" type="text/css" href="./../styles/dashboard.css")
         link(rel="stylesheet" type="text/css" href="./../styles/loader.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/growler.css")
     body
         include ./components/loader
         main
@@ -20,4 +21,5 @@ html
                 h3.server_messages
             div.buttons
                 input(class="create-button" type="button" id="create" value="create game")
+        div.growler-container
         script(type="text/javascript" src="./../scripts/dashboard.bundle.js")

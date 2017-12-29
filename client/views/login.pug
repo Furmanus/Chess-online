@@ -5,18 +5,19 @@ html
         title Battle Chess
         link(rel="stylesheet" type="text/css" href="./../styles/login.css")
         link(rel="stylesheet" type="text/css" href="./../styles/loader.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/growler.css")
     body
         div.main
             div.form-container.center
                 include ./components/loader
                 form.center
                     p.space-down User login:
-                    input(name="login" class="input-text" type="text" placeholder="enter login")
-                    p.error-text#error
+                    input(name="login" class="space-down input-text" type="text" placeholder="enter login")
                     p.space-down Password:
                     input(name="password" class="input-text gap-down" type="password" placeholder="enter password")
                     br
-                    input(class="space-down button horizontal-center" id="submit" type="button" value="submit")
+                    input(class="space-down button horizontal-center" id="submit" type="button" value="login")
                     br
                     input(class="space-down button horizontal-center" id="register" type="button" value="register")
+        div.growler-container
     script(type="text/javascript" src="./../scripts/login.bundle.js")

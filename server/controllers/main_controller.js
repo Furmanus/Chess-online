@@ -54,6 +54,25 @@ class MainController extends Observer{
         return this.getDatabaseConnection().addGameToUserGames(username, id);
     }
     /**
+     * Method responsible for fetching user data from database.
+     * @param {string}      username    Name of user.
+     * @returns {Promise}               Returns a promise. Fulfilled promise contains data about found user (or returns empty array if no user was found).
+     */
+    getUserDataFromDatabase(username){
+
+        return this.getDatabaseConnection().findUserByName(username);
+    }
+    /**
+     * Method responsible for registering user in database.
+     * @param {string}          username    Name of user.
+     * @param {string}          password    User password.
+     * @returns {Promise<T>}                Returns a promise.
+     */
+    registerUserInDatabase(username, password){
+
+        return this.getDatabaseConnection().insertNewUser(username, password);
+    }
+    /**
      * Method responsible for getting all registered active games from database.
      * @returns {Promise<any>}
      */

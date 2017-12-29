@@ -45,6 +45,7 @@ class Router{
         this.getRouterObject().post('/login_form_validate', this.playerLoginHandler.bind(this));
         this.getRouterObject().get('/logout', this.logoutUser.bind(this));
         this.getRouterObject().get('/game', this.gamePage.bind(this));
+        this.getRouterObject().post('/register', this.registerClient.bind(this));
         this.getRouterObject().all('*', this.isUserLoggedIn.bind(this));
         this.getRouterObject().get('/dashboard', this.dashboardPage.bind(this));
         this.getRouterObject().post('/create_game', this.createGame.bind(this));
@@ -94,6 +95,41 @@ class Router{
 
                 console.log(error);
             });
+        }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    /**
+     * Callback method for '/register' POST request. Responsible for registering users in database.
+     * @param req
+     * @param res
+     */
+    registerClient(req, res){
+
+        const username = req.body.user;
+        const password = req.body.password;
+        const routerObject = this;
+
+        //we check if username already exist in database
+        this.getMainController().getUserDataFromDatabase(username).then(function(data){
+
+            //if yes (promise returned non empty array, we send message to client that operation was unsuccessful
+            if(data.length){
+
+                res.send({result: false, message: 'User already exist'});
+            }else{
+                //in other case we register user. After user is registered in database, we set user in session and register him and his sessionID in users map
+                routerObject.getMainController().registerUserInDatabase(username, password).then(function(data){
+
+                    routerObject.getSessionManager().getLoggedUsersMap().set(username, req.sessionID);
+                    req.session.user = username;
+                    res.send({result: true, message: 'User successfully registered'});
+                }).catch(function(error){
+
+                    console.log(error);
+                });
+            }
         }).catch(function(error){
 
             console.log(error);
@@ -319,7 +355,13 @@ class Router{
             next();
         }else{
 
-            res.send({forcedRedirectUrl: '/'});
+            if(req.query.isAjaxRequest || req.body.isAjaxRequest) {
+
+                res.send({forcedRedirectUrl: '/'});
+            }else{
+
+                res.render('login');
+            }
         }
     }
     /**
