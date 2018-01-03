@@ -92,7 +92,10 @@ class Ajax{
             ajax.send();
         });
     }
-
+    /**
+     * Method responsible for validating whether client should be redirected to another page.
+     * @param {Object}  responseData    Response object.
+     */
     static validateAjaxResponseRedirect(responseData){
 
         if(responseData.forcedRedirectUrl){

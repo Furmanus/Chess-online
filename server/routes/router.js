@@ -53,6 +53,8 @@ class Router{
         this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler.bind(this));
         this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData.bind(this));
         this.getRouterObject().get('/games', this.getUserGames.bind(this));
+        this.getRouterObject().get('/games_to_join', this.getGamesToJoin.bind(this));
+        this.getRouterObject().post('/join_game', this.joinGame.bind(this));
     }
     /**
      * Callback function for '/' GET route. Checks if user is already logged in and if he is, redirects him to dashboard. Renders login page otherwise.
@@ -177,8 +179,80 @@ class Router{
      */
     gamePage(req, res){
 
-        req.session.touch(req.sessionID);
-        res.render('board');
+        const user = req.query.user;
+        const gameId = req.query.id;
+        let examinedGameObject;
+        let whitePlayerValidation;
+        let blackPlayerValidation;
+
+        this.getMainController().getAllGamesData().then(function(gamesList){
+
+            examinedGameObject = gamesList.find(function(item){
+
+                return item._id.toString() === gameId;
+            });
+
+            whitePlayerValidation = examinedGameObject.white && examinedGameObject.white.toString() === user;
+            blackPlayerValidation = examinedGameObject.black && examinedGameObject.black.toString() === user;
+
+            if(examinedGameObject && (whitePlayerValidation || blackPlayerValidation)){
+                //TODO w przypadku gdy czarny jest nullem i user nie jest biały, wpisać usera do bazy jako czarnego gracza
+                req.session.touch(req.sessionID);
+                res.render('board');
+            }else{
+                //TODO zamienić na render strony 403 forbidden access
+                console.log('forbidden access');
+                res.render('login');
+            }
+        }).catch(function(error){
+
+            console.log('game page route error');
+            console.log(error);
+        });
+    }
+    /**
+     * Callback function for '/join_game' post route.
+     * @param {Object}  req
+     * @param {Object}  res
+     */
+    joinGame(req, res){
+
+        const user = req.body.user;
+        const gameToJoinObject = req.body.data;
+        const id = gameToJoinObject._id.toString();
+        const routerObject = this;
+        let examinedGame;
+
+        this.getMainController().getAllGamesData().then(function(data){
+
+             examinedGame = data.find(function(gamesListItem){
+
+                 return gameToJoinObject._id.toString() === gamesListItem._id.toString();
+             });
+
+             if(examinedGame){
+
+                 if(examinedGame.white && !examinedGame.black){
+
+                     routerObject.getMainController().joinBlackPlayerToGame(id, user).then(function(joinResultData){
+
+                         res.send({result: true, message: 'You joined chosen game'});
+                     }).catch(function(error){
+
+                         console.log(error);
+                     });
+                 }else if(examinedGame.white && examinedGame.black){
+
+                     res.send({result: false, message: 'This game already has two players'});
+                 }
+             }else{
+
+                 res.send({result: false, message: 'Game not found'});
+             }
+        }).catch(function(error){
+
+            console.log(error);
+        });
     }
     /**
      * Callback function for '/logout' GET route. Destroys session, removes user from logged users and redirects user to login page.
@@ -338,6 +412,40 @@ class Router{
 
             console.log(error);
         });
+    }
+    /**
+     * Callback function for '/games_to_join' GET route. Responsible for obtaining from database games to which user can join.
+     * @param {Object}  req
+     * @param {Object}  res
+     */
+    getGamesToJoin(req, res){
+
+        const user = req.query.user;
+        const routerObject = this;
+        let filteredList;
+
+        this.getMainController().getAllGamesData().then(function(gamesListData){
+
+            gamesListData.forEach(function(item){
+
+                delete item.boardData;
+            });
+
+            filteredList = gamesListData.filter(function(item){
+
+                if(item.white.toString() !== user && item.black === null && item.hasEnded === false){
+
+                    return true;
+                }
+
+                return false;
+            });
+
+            res.send(filteredList);
+        }).catch(function(error){
+
+            console.log(error);
+        })
     }
     /**
      * Middleware method for all routes, validates whether user is already logged in. If yes, next() method is called, otherwise, login page is rendered.
