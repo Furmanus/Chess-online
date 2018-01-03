@@ -155,10 +155,11 @@ class DatabaseConnection{
         const databaseObject = this;
         const ObjectID = mongo.ObjectID;
 
-        return this.getGameData(gameId).then(function(currentGameData){
+        return this.getGameDataById(gameId).then(function(currentGameData){
 
             const newGameData = {
 
+                white: currentGameData.white,
                 black: blackPlayer ? blackPlayer : currentGameData.black,
                 boardData: serializedBoardModel ? serializedBoardModel : currentGameData.boardData,
                 activePlayer: activePlayer ? activePlayer : currentGameData.activePlayer,
@@ -187,7 +188,15 @@ class DatabaseConnection{
     }
     changeBlackPlayerNameInGame(gameId, blackPlayer){
 
-        return this.updateGameData(gameId, null, null, blackPlayer);
+        const databaseHelperObject = this;
+
+        return this.updateGameData(gameId, null, null, blackPlayer).then(function(data){
+
+            return databaseHelperObject.addGameToUserGames(blackPlayer, gameId);
+        }).catch(function(error){
+
+            console.log(error);
+        });
     }
     endGame(gameId){
 

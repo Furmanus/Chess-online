@@ -81,6 +81,16 @@ class MainController extends Observer{
         return this.getDatabaseConnection().getAllGamesData();
     }
     /**
+     * Method responsible for joining black player to game.
+     * @param {string}  gameId          Game ID from database.
+     * @param {string}  blackPlayer     Name of player.
+     * @returns {Promise}
+     */
+    joinBlackPlayerToGame(gameId, blackPlayer){
+
+        return this.getDatabaseConnection().changeBlackPlayerNameInGame(gameId, blackPlayer);
+    }
+    /**
      * Returns board controller.
      * @returns {BoardController}
      */

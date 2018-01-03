@@ -14,6 +14,7 @@ const mainPageElement = Symbol();
 const serverMessagesElement = Symbol();
 const logoutInputElement = Symbol();
 const createInputElement = Symbol();
+const sliderMenuElement = Symbol();
 
 /**
  * @class
@@ -40,9 +41,14 @@ class DashboardPage extends Page{
         this[logoutInputElement] = document.getElementById('logout');
         /**@type {HTMLInputElement}*/
         this[createInputElement] = document.getElementById('create');
+        /**@type {HTMLElement}*/
+        this[sliderMenuElement] = document.querySelector('.slider-menu-list');
 
-        this.initialize();
+        this.sliderMenuOnMouseLeave = this.sliderMenuOnMouseLeave.bind(this);
+        this.sliderMenuOnMouseOver = this.sliderMenuOnMouseOver.bind(this);
+
         this.attachEvents();
+        this.initialize();
     }
     initialize(){
 
@@ -55,6 +61,8 @@ class DashboardPage extends Page{
 
         this[logoutInputElement].addEventListener('click', this.logout.bind(this));
         this[createInputElement].addEventListener('click', this.createNewGame.bind(this));
+        this[sliderMenuElement].addEventListener('mouseover', this.sliderMenuOnMouseOver);
+        this[sliderMenuElement].addEventListener('mouseleave', this.sliderMenuOnMouseLeave);
     }
     /**
      * Method responsible for retrieving user name from page url query.
@@ -68,17 +76,18 @@ class DashboardPage extends Page{
     }
     /**
      * Method responsible for creating new HTML li element, adding content to it and appending to games list.
-     * @param {Object]  element
+     * @param {Object]  data
+     * @param {string}  user
      */
-    addItemToGamesList(data){
+    addItemToGamesList(data, user){
 
         const li = document.createElement('li');
-        li.innerHTML = Templates.getDashboardGameListElement(data);
+        li.innerHTML = Templates.getDashboardGameListElement(data, user);
 
         this[gamesListElement].appendChild(li);
     }
     /**
-     * Method responsible for fetching user ongoing games data from server and attaching each game to games list.
+     * Method responsible for fetching user ongoing and available to join games data from server and attaching each game to appriopiate list.
      */
     getGamesFromServer(){
 
@@ -95,20 +104,36 @@ class DashboardPage extends Page{
 
                 data.forEach(function (element) {
 
-                    dashBoardPageObject.addItemToGamesList(element);
+                    dashBoardPageObject.addItemToGamesList(element, user);
                 });
 
-                // if(data.length > 3){
-                //
-                //     dashBoardPageObject[createInputElement].disabled = true;
-                // }
                 dashBoardPageObject.validateGamesQuantity();
             }else{
 
-                dashBoardPageObject.showServerMessage('Seems you have no ongoing games.')
+                dashBoardPageObject.showServerMessage('You have no ongoing games.')
             }
 
-            dashBoardPageObject.hideLoader();
+            Ajax.get('/games_to_join', {user}, true).then(function(data){
+
+                if(data.length){
+
+                    data.forEach(function(item){
+
+                        dashBoardPageObject.addItemToSliderMenu(item);
+                    });
+                }else{
+
+                    dashBoardPageObject.addItemToSliderMenu();
+                }
+
+                dashBoardPageObject.hideLoader();
+            }).catch(function(error){
+
+                console.log(error);
+            });
+        }).catch(function(error){
+
+            console.log(error);
         });
     }
     /**
@@ -133,14 +158,12 @@ class DashboardPage extends Page{
         let newListElement;
 
         this.showLoader();
-        this.disableButtons();
 
         Ajax.post('/create_game', {user}).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
             dashboardPageObject.addItemToGamesList(data);
             dashboardPageObject.hideLoader();
-            dashboardPageObject.enableButtons();
             dashboardPageObject.validateGamesQuantity();
 
             DomHelper.showGrowler('Game successfully created');
@@ -158,6 +181,7 @@ class DashboardPage extends Page{
 
         this.addClass(this.getMainElement(), 'transparent');
         this.showElement(loader);
+        this.disableButtons();
     }
     /**
      * Method responsible for hiding loader.
@@ -168,6 +192,7 @@ class DashboardPage extends Page{
 
         this.removeClass(this.getMainElement(), 'transparent');
         this.hideElement(loader);
+        this.enableButtons();
     }
     /**
      * Displays message from server.
@@ -191,27 +216,113 @@ class DashboardPage extends Page{
 
         const list = this.getGamesList().childNodes;
 
-        if(list.length > 4){
+        if(list.length > 3){
 
             this.disableElement(this[createInputElement]);
+            this.hideElement(this[sliderMenuElement]);
         }
     }
     /**
-     * Method responsible for disabling buttons on page.
+     * Method responsible for creating new side slider list item.
+     * @param {Object}  data    Data containing information about game.
      */
-    // disableButtons(){
-    //
-    //     this.disableElement(this[createInputElement]);
-    //     this.disableElement(this[logoutInputElement]);
-    // }
+    addItemToSliderMenu(data){
+
+        const li = document.createElement('li');
+        let link;
+
+        li.innerHTML = data ? Templates.getDashboardSliderMenuListElement(data) : Templates.getDashboardEmptySliderMenuListElement();
+        link = li.querySelector('a');
+
+        if(link) {
+
+            link.addEventListener('click', this.joinGame.bind(this, data));
+        }
+
+        this[sliderMenuElement].appendChild(li);
+    }
     /**
-     * Method responsible for enabling buttons on page.
+     * Callback function for slider menu on event "onmouseover".
      */
-    // enableButtons(){
-    //
-    //     this.enableElement(this[createInputElement]);
-    //     this.enableElement(this[logoutInputElement]);
-    // }
+    sliderMenuOnMouseOver(){
+
+        const firstMenuItem = this[sliderMenuElement].querySelector('.slider-menu-list > li:first-child');
+        const sliderMenuItems = this[sliderMenuElement].querySelectorAll('.slider-menu-list > li:not(:first-child)');
+
+        this[sliderMenuElement].classList.add('active');
+        firstMenuItem.classList.add('active');
+        sliderMenuItems.forEach(function(menuItem){
+
+            menuItem.classList.add('active');
+        });
+    }
+    /**
+     * Callback function for slider menu on event "onmouseleave".
+     */
+    sliderMenuOnMouseLeave(){
+
+        const firstMenuItem = this[sliderMenuElement].querySelector('.slider-menu-list > li:first-child');
+        const sliderMenuItems = this[sliderMenuElement].querySelectorAll('.slider-menu-list > li:not(:first-child)');
+
+        this[sliderMenuElement].classList.remove('active');
+        this[sliderMenuElement].scrollTop = 0;
+        firstMenuItem.classList.remove('active');
+        sliderMenuItems.forEach(function(menuItem){
+
+            menuItem.classList.remove('active');
+        });
+    }
+    /**
+     * Callback function for link click event handler, inside game to join.
+     * @param {Object}      gameDataObject  Object with chosen game to join data.
+     * @param {MouseEvent}  ev              Mouse event which triggered this function.
+     */
+    joinGame(gameDataObject, ev){
+
+        const user = this.getUser();
+        const dashboardObject = this;
+        const linkParentElement = ev.target.parentElement.parentElement.parentElement;
+
+        ev.preventDefault();
+        this.showLoader();
+
+        Ajax.post('/join_game', {data: gameDataObject, user: user}).then(function(data){
+
+            if(data.result){
+
+                Object.defineProperty(gameDataObject, 'black', {value: user});
+                dashboardObject[sliderMenuElement].removeChild(linkParentElement);
+                dashboardObject.addItemToGamesList(gameDataObject);
+            }
+
+            DomHelper.showGrowler(data.message);
+            dashboardObject.hideLoader();
+            dashboardObject.validateGamesQuantity();
+        }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    /**
+     * Method responsible for disabling page elements. Overrides method in page class.
+     */
+    disableButtons(){
+
+        super.disableButtons();
+
+        this[sliderMenuElement].removeEventListener('mouseover', this.sliderMenuOnMouseOver);
+        this[sliderMenuElement].removeEventListener('mouseleave', this.sliderMenuOnMouseLeave);
+    }
+    /**
+     * Method responsible for enabling page elements. Overrides method in page class.
+     */
+    enableButtons(){
+
+        super.enableButtons();
+
+        this[sliderMenuElement].addEventListener('mouseover', this.sliderMenuOnMouseOver.bind(this));
+        this[sliderMenuElement].addEventListener('mouseleave', this.sliderMenuOnMouseLeave.bind(this));
+    }
     /**
      * Returns user name.
      * @returns {string}
