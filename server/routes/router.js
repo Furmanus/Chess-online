@@ -144,14 +144,33 @@ class Router{
      */
     getInitialPlayerData(req, res){
 
-        const playerData = this.getMainController().getInitialPlayerData(req.body.id);
+        const user = req.body.user;
+        const gameId = req.body.gameId;
+        let colour;
 
-        res.send(JSON.stringify(playerData))
+        this.getMainController().getGameDataByIdPromise(gameId).then(function(data){
 
-        if(playerData.colour === ColourEnums.BLACK){
+            if(data.white === user){
 
-            eventEmmiter.emit(EventEnums.SEND_SERVER_GAME_STATUS_READY, {id: playerData.opponentId});
-        }
+                colour = ColourEnums.WHITE;
+            }else if(data.black === user){
+
+                colour = ColourEnums.BLACK;
+            }else{
+
+                throw new Error('User is not recognized as active player in this game');
+            }
+
+            res.send({
+
+                colour: colour,
+                activePlayer: data.activePlayer,
+                boardData: data.boardData
+            });
+        }).catch(function(error){
+
+
+        });
     }
     /**
      * Callback function for '/board_state' GET route. Takes board states from main controller and sends it in response.
@@ -160,7 +179,15 @@ class Router{
      */
     getBoardState(req, res){
 
-        res.json(this.getMainController().getBoardState());
+        const gameId = req.query.gameId;
+
+        this.getMainController().getGameDataByIdPromise(gameId).then(function(data){
+
+            console.log(data);
+        }).catch(function(error){
+
+
+        });
     }
     /**
      * Callback function for '/dashboard' GET route. Renders dashboard page.

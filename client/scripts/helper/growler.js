@@ -11,6 +11,7 @@ const growlers = new Set();
 
 /**
  * @class
+ * @typedef Growler
  */
 class Growler{
 

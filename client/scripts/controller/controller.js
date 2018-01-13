@@ -23,7 +23,13 @@ const gameModel = Symbol();
  */
 class MainController extends Observer{
 
-    constructor(){
+    /**
+     * Constructor for main controller.
+     * @param {Object}  initialData     Object with game data.
+     * @param {string}  id              Unique game id from database.
+     * @param {string}  user            User name.
+     */
+    constructor(initialData){
         super();
 
         /**@type {View}*/
@@ -31,17 +37,14 @@ class MainController extends Observer{
         /**@type {SocketClientManager}*/
         this[socketClientManager] = new SocketClientManager();
         /**@type {GameModel}*/
-        this[gameModel] = new GameModel();
+        this[gameModel] = new GameModel(initialData);
         /**@type {BoardController}*/
         this[boardController] = new BoardController(this.getMainView().getBoardView(), this.getSocketClientManager(), this.getGameModel());
         /**@type {PanelController}*/
         this[panelController] = new PanelController(this.getMainView().getPanelView(), this.getSocketClientManager());
 
-        this.fetchPlayerDataFromServer = this.fetchPlayerDataFromServer.bind(this);
-        this.onPlayerMoveReady = this.onPlayerMoveReady.bind(this);
-        this.onGameReady = this.onGameReady.bind(this);
-
         this.initialize();
+        this.attachEvents();
     }
 
     /**
@@ -49,33 +52,43 @@ class MainController extends Observer{
      */
     initialize(){
 
-        this.getSocketClientManager().on(this, EventEnums.SOCKET_CONNECTION_ESTABLISHED, this.fetchPlayerDataFromServer);
-        this.getSocketClientManager().on(this, EventEnums.CLIENT_NOTIFY_MOVE_READY, this.onPlayerMoveReady);
-        this.getSocketClientManager().on(this, EventEnums.BOTH_PLAYERS_READY, this.onGameReady);
+
     }
     /**
-     * Method responsible for initializing game after receiving message from server that both players are ready.
+     * Method responsible for listening on events.
      */
-    onGameReady(){
+    attachEvents(){
 
-        this.getPanelController().addMessageInView('Both players are ready! White starts the game.');
+        this.getSocketClientManager().on(this, EventEnums.SOCKET_CONNECTION_ESTABLISHED, this.fetchUserDataFromServer.bind(this));
+        this.getSocketClientManager().on(this, EventEnums.CLIENT_NOTIFY_MOVE_READY, this.onPlayerMoveReady.bind(this));
+
+        this.getBoardController().on(this, EventEnums.MOVE_READY_TO_SEND_SERVER, this.onMoveReadyToSendToServer.bind(this));
     }
     /**
      * Method responsible for sending initial AJAX post request to server.
      */
-    fetchPlayerDataFromServer(){
+    fetchUserDataFromServer(){
 
-        const socketId = this.getSocketClientManager().getSocketId();
+        const user = this.getGameModel().getUserName();
+        const gameId = this.getGameModel().getGameId();
 
-        Ajax.post('/initial_player_data', {id: socketId}).then(function(data){
+        Ajax.post('/initial_player_data', {user, gameId}).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
 
             this.getGameModel().setPlayerColour(data.colour);
+            this.getGameModel().setActivePlayer(data.activePlayer);
+            this.getBoardController().buildBoardModel(data.boardData);
+            this.getBoardController().setBoardStateInView(data.boardData);
+            this.getPanelController().addMessageInView(`Welcome! You are playing ${data.colour} pieces.`);
 
-            if(data.colour === ColourEnums.WHITE){
+            if(data.colour === data.activePlayer){
 
+                this.getPanelController().addMessageInView('It is your move now.');
                 this.getBoardController().listenToViewEvents();
+            }else{
+
+                this.getPanelController().addMessageInView('It is your opponent move now.');
             }
         }.bind(this)).catch(function(error){
 
@@ -83,30 +96,53 @@ class MainController extends Observer{
         }.bind(this));
     }
     /**
+     * Method responsible for sending information about move made by player to server. Triggered by board controller notifying move made by client.
+     * @param {Object}  data        Object containing data about move made by player
+     * @param {number}  sourceX     Horizontal coordinate of starting cell
+     * @param {number}  sourceY     Vertical coordinate of starting cell
+     * @param {number}  targetX     Horizontal coordinate of target cell
+     * @param {number}  targetY     Vertical coordinate of target cell
+     */
+    onMoveReadyToSendToServer(data){
+
+        const gameId = this.getGameModel().getGameId();
+        const user = this.getGameModel().getUserName();
+        const colour = this.getGameModel().getPlayerColour();
+        const additionalData = {
+
+            gameId,
+            user,
+            colour
+        }
+
+        Object.assign(data, additionalData);
+        this.getSocketClientManager().sendPlayerMoveToServer(data);
+    }
+    /**
      * Method triggered after controller being notified by socket manager that one player made his move.
      * @param {Object}  data
-     * TODO uzupełnic resztę
      */
     onPlayerMoveReady(data){
 
-        const fromString = `${data.sourceCoords.x + 1}x${data.sourceCoords.y + 1}`;
-        const targetString = `${data.targetCoords.x + 1}x${data.targetCoords.y + 1}`;
+        const fromString = `${data.sourceX + 1}x${data.sourceY + 1}`;
+        const targetString = `${data.targetX + 1}x${data.targetY + 1}`;
+        const previousPlayer = data.activePlayer === ColourEnums.WHITE ? ColourEnums.BLACK : ColourEnums.WHITE;
+        const moveModelData = this.getBoardController().moveFigure({x: data.sourceX, y: data.sourceY}, {x: data.targetX, y: data.targetY});
+
+        this.getPanelController().addMessageInView(`${previousPlayer} player moved ${moveModelData.figure} from ${fromString} to ${targetString}.`);
+        this.getGameModel().setActivePlayer(data.activePlayer);
 
         if(data.activePlayer === this.getGameModel().getPlayerColour()){
 
             this.getBoardController().listenToViewEvents();
-            this.getBoardController().highlightFiguresAbleToMoveInView(data.activePlayerFiguresToMove);
         }else{
 
             this.getBoardController().detachEventsInView();
         }
 
-        this.getBoardController().moveFigure(data.sourceCoords, data.targetCoords);
-        this.getPanelController().addMessageInView(`${data.previousPlayer} player moved ${data.movedFigure} from ${fromString} to ${targetString}.`);
-
-        if(data.capturedFigure){
+        if(moveModelData.capturedFigure){
             
-            this.getPanelController().addMessageInView(`${data.previousPlayer} player captured ${data.activePlayer} player's ${data.capturedFigure}!`);
+            this.getPanelController().addMessageInView(`${previousPlayer} player captured ${data.activePlayer} player's ${moveModelData.capturedFigure}!`);
         }
     }
     /**

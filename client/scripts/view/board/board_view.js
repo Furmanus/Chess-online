@@ -81,7 +81,6 @@ class BoardView extends Observer{
             }
         }
     }
-
     /**
      * Sets view of every cell from object fetched from server.
      * @param {Object} gameState
@@ -91,7 +90,7 @@ class BoardView extends Observer{
         let x;
         let y;
         let figure;
-        let owner;
+        let colour;
         let parentElement;
 
         for(let element in gameState){
@@ -99,12 +98,12 @@ class BoardView extends Observer{
             x = element[0];
             y = element[2];
             figure = gameState[element].figure;
-            owner = gameState[element].owner;
+            colour = gameState[element].colour;
             parentElement = this.getCells().get(`${x}x${y}`);
 
             if(figure){
 
-                parentElement.setFigure(new Figure(figure, owner, parentElement.getElement()));
+                parentElement.setFigure(new Figure(figure, colour, parentElement.getElement()));
             }
         }
     }
@@ -162,7 +161,7 @@ class BoardView extends Observer{
 
         //if chosen cell contains figure, we need to take its parent element. Div element with figure is nested inside div element representing board cell.
         let selectedCell = ev.target.classList.contains('figure') ? ev.target.parentElement : ev.target;
-
+        //TODO czasami selectCell jest boardem, sprawdzić czemu
         const coordinates = this.convertStringCoordinatesToObject(selectedCell.dataset.coordinates);
         this.notify(EventEnums.BOARD_CLICK, coordinates);
     }
@@ -192,6 +191,10 @@ class BoardView extends Observer{
     highlightFigurePossibleMoves(possibleMoves){
 
         this.highlightArrayOfCells(possibleMoves, HighlightEnums.BLUE);
+    }
+    highlightSelectedFigure(x, y){
+
+        this.highlightCell(x, y, HighlightEnums.RED);
     }
     highlightFiguresAbleToMove(figuresCoords){
         //TODO CZEMU TO NIE DZIALA DO KURWY NĘDZY?

@@ -3,7 +3,6 @@
  */
 
 /**
- * TODO poprawić aby obsługiwało zagnieżdżone obiekty.
  * Method which converts object into url like query (example: {a: 1, b: 2} -> 'a=1&b=2'). Works only with object with values of primitive types.
  * @param   {Object}    object  Object to convert.
  * @returns {string}    String containing converted data.

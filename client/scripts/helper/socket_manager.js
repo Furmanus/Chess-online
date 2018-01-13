@@ -65,13 +65,29 @@ class SocketClientManager extends Observer{
 
         this.notify(EventEnums.BOTH_PLAYERS_READY);
     }
+    /**
+     * Method responsible for notifying controller after receiving message from server about move made by player.
+     * @param {Object}  data    Data received from server
+     */
     onPlayerMoveListener(data){
 
         this.notify(EventEnums.CLIENT_NOTIFY_MOVE_READY, data);
     }
+    sendPlayerMoveToServer(data){
+
+        this.emitEvent(EventEnums.SEND_PLAYER_MOVE, data);
+    }
+    emitEvent(eventName, data){
+
+        this.getSocket().emit(eventName, data);
+    }
     getSocketId(){
 
         return this[socket].id;
+    }
+    getSocket(){
+
+        return this[socket];
     }
 }
 

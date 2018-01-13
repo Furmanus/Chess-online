@@ -3,6 +3,8 @@
  */
 
 const figure = Symbol();
+const x = Symbol();
+const y = Symbol();
 
 /**
  * @class
@@ -12,15 +14,18 @@ class CellModel{
 
     /**
      * Constructor for board cell model.
+     * @param {number}      x               Horizontal coordinate of cell.
+     * @param {number}      y               Vertical coordinate of cell.
      * @param {Figure|null} figureObject    Figure object in this cell or null.
      */
-    constructor(figureObject){
+    constructor(xCoordinate, yCoordinate, figureObject){
 
-        /**
-         * @private
-         * @type      {Figure|null}
-         */
+        /**@type {Figure|null}*/
         this[figure] = figureObject;
+        /**@type {number}*/
+        this[x] = xCoordinate;
+        /**@type {number}*/
+        this[y] = yCoordinate;
     }
     /**
      * Returns figure in this cell.
@@ -47,6 +52,18 @@ class CellModel{
 
         this[figure] = null;
     }
+    /**
+     * Returns coordinates object of cell.
+     * @returns {{x: number, y: number}}
+     */
+    getCoordinates(){
+
+        return {
+
+            x: this[x],
+            y: this[y]
+        }
+    }
 }
 
-module.exports = CellModel;
+export default CellModel;

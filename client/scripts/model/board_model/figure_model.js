@@ -2,12 +2,12 @@
  * @author Lukasz Lach
  */
 
-const FigureEnums = require('./../../../enums/figures');
-const ColourEnums = require('./../../../enums/colours');
-const DirectionEnums = require('./../../../enums/directions');
-const figuresPossibleMoves = require('./figure_moves');
+import FigureEnums from './../../../../enums/figures';
+import ColourEnums from './../../../../enums/colours';
+import DirectionEnums from './../../../../enums/directions';
+import figuresPossibleMoves from './../../helper/figure_moves';
 
-const owner = Symbol();
+const colour = Symbol();
 const possibleMoves = Symbol();
 const figureName = Symbol();
 const hasMoved = Symbol();
@@ -20,16 +20,17 @@ const hasMoved = Symbol();
 class Figure{
     /**
      * Constructor for figure data model class.
-     * @param playerOwner   String name of player colour who owns figure. Member of ColourEnums.
-     * @param figureType    String name of type of this figure. Member of FigureEnums.
+     * @param {string}  colour                  String name of player colour who owns figure. Member of ColourEnums.
+     * @param {string}  figureType              String name of type of this figure. Member of FigureEnums.
+     * @param {boolean} hasFigureMoved          Variable indicating whether figure made its first move.
      */
-    constructor(playerOwner, figureType){
+    constructor(figureColour, figureType, hasFigureMoved = false){
 
         /**
          * @type {string}
          * @memberOf {ColourEnums}
          */
-        this[owner] = playerOwner;
+        this[colour] = figureColour;
         /**@type {Object}*/
         this[possibleMoves] = {};
         /**
@@ -38,7 +39,7 @@ class Figure{
          */
         this[figureName] = figureType;
         /**@type {boolean}*/
-        this[hasMoved] = false;
+        this[hasMoved] = hasFigureMoved;
 
         this.initializePossibleMoves();
     }
@@ -50,7 +51,7 @@ class Figure{
         const possibleMoves = this.getPossibleMoves();
         const figureName = this.getFigureName();
         //needed to calculate pawn possible moves
-        const moveDirection = (this.getOwner() === ColourEnums.WHITE) ? DirectionEnums.NORTH : DirectionEnums.SOUTH;
+        const moveDirection = (this.getColour() === ColourEnums.WHITE) ? DirectionEnums.NORTH : DirectionEnums.SOUTH;
         const movesTableByDirection = (moveDirection === DirectionEnums.NORTH) ? [{x: 0, y: -2}, {x: 0, y: -1}] : [{x: 0, y: 2}, {x: 0, y: 1}];
         /**
          * Last condition in below ternary operator creates copy of array defined in figure_moves.js file.
@@ -58,6 +59,11 @@ class Figure{
          * moves. Right now it doesn't matter, because except for pawn, all figures have fixed set of moves which doesn't change as game goes on.
          */
         const figureMoves = (figureName === FigureEnums.PAWN) ? movesTableByDirection : figuresPossibleMoves[figureName].moves.slice();
+
+        if(this.hasFigureMoved()){
+
+            movesTableByDirection.splice(0, 1);
+        }
 
         possibleMoves.continous = figuresPossibleMoves[figureName].continous;
         possibleMoves.directional = figuresPossibleMoves[figureName].directional;
@@ -69,10 +75,11 @@ class Figure{
      */
     markFigureAsMoved(){
 
-        const moveValueToSubstract = (this.getOwner() === ColourEnums.WHITE) ? -1 : 1;
+        if(!this[hasMoved]) {
 
-        this[hasMoved] = true;
-        this.getPossibleMoves().moves.splice(0, 1);
+            this[hasMoved] = true;
+            this.getPossibleMoves().moves.splice(0, 1);
+        }
     }
     /**
      * Returns possible moves object of a figure.
@@ -86,9 +93,9 @@ class Figure{
      * Returns owner of figure.
      * @return {string}
      */
-    getOwner(){
+    getColour(){
 
-        return this[owner];
+        return this[colour];
     }
     /**
      * Returns name of this figure.

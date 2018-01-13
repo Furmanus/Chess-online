@@ -2,8 +2,8 @@
  * @author Lukasz Lach
  */
 
-const FigureEnums = require('./../../enums/figures');
-const ColourEnums = require('./../../enums/colours');
+const FigureEnums = require('../../../enums/figures');
+const ColourEnums = require('../../../enums/colours');
 
 /**
  * Method responsible for returning array containing objects with coordinates of certain figure possible moves.
@@ -14,11 +14,12 @@ const ColourEnums = require('./../../enums/colours');
  */
 module.exports = function(figure, startingPoint, boardState){
 
-    const owner = figure.getOwner();
+    const owner = figure.getColour();
     const name = figure.getFigureName();
     const moves = figure.getPossibleMoves().moves;
     const resultPossibleMoves = [];
-    let currentPoint = null
+    let currentPoint = null;
+    let pawnMoves;
 
     if(figure.getPossibleMoves().continous){
         //calculating moves for rook, bishop and queen
@@ -35,8 +36,11 @@ module.exports = function(figure, startingPoint, boardState){
         if(figure.getPossibleMoves().directional){
             //we check if examined pawn moves north or south, and we take only object where pawn moves by one field. We use it later to calculate diagonal captures.
             const verticalDirection = moves[moves.length - 1];
+            //we reverse array, so moves are examined in ascending (by distance) order. We copy array so original array won't be modified (in case of repeated click on same figure)
+            pawnMoves = moves.slice().reverse();
 
-            for(let move of moves){
+            for(let move of pawnMoves){
+
                 currentPoint = {x: startingPoint.x + move.x, y: startingPoint.y + move.y};
 
                 if(currentPoint.x < 0 || currentPoint.x > 7 || currentPoint.y < 0 || currentPoint.y > 7){
@@ -47,11 +51,12 @@ module.exports = function(figure, startingPoint, boardState){
 
                     resultPossibleMoves.push({x: startingPoint.x + move.x, y: startingPoint.y + move.y});
                 }
+                //we check if pawn can capture any figure, in diagonal direction
                 if(currentPoint.x - 1 >= 0){
 
                     let examinedDiagonalLeftPoint = boardState[`${currentPoint.x - 1}x${startingPoint.y + verticalDirection.y}`];
 
-                    if(examinedDiagonalLeftPoint.figure && examinedDiagonalLeftPoint.owner !== owner){
+                    if(examinedDiagonalLeftPoint.figure && examinedDiagonalLeftPoint.colour !== owner){
 
                         resultPossibleMoves.push({x: currentPoint.x - 1, y: startingPoint.y + verticalDirection.y});
                     }
@@ -60,10 +65,15 @@ module.exports = function(figure, startingPoint, boardState){
 
                     let examinedDiagonalRightPoint = boardState[`${currentPoint.x + 1}x${startingPoint.y + verticalDirection.y}`];
 
-                    if(examinedDiagonalRightPoint.figure && examinedDiagonalRightPoint.owner !== owner){
+                    if(examinedDiagonalRightPoint.figure && examinedDiagonalRightPoint.colour !== owner){
 
                         resultPossibleMoves.push({x: currentPoint.x + 1, y: startingPoint.y + verticalDirection.y});
                     }
+                }
+                //case where path in front of pawn is blocked by a figure, we prevent further calculation of possible movement
+                if(Math.abs(move.y) === 1 && boardState[`${currentPoint.x}x${currentPoint.y}`].figure){
+
+                    break;
                 }
             }
         }else{
@@ -77,7 +87,7 @@ module.exports = function(figure, startingPoint, boardState){
                     continue;
                 }
 
-                if(boardState[`${currentPoint.x}x${currentPoint.y}`].figure && boardState[`${currentPoint.x}x${currentPoint.y}`].owner === owner){
+                if(boardState[`${currentPoint.x}x${currentPoint.y}`].figure && boardState[`${currentPoint.x}x${currentPoint.y}`].colour === owner){
 
                     continue;
                 }
@@ -101,7 +111,7 @@ module.exports = function(figure, startingPoint, boardState){
         }
         if(boardState[`${currentPoint.x}x${currentPoint.y}`].figure){
 
-            if(boardState[`${currentPoint.x}x${currentPoint.y}`].owner === owner){
+            if(boardState[`${currentPoint.x}x${currentPoint.y}`].colour === owner){
 
                 return;
             }else{

@@ -45,19 +45,9 @@ class Server{
         this[databaseConnection] = new MongoDb();
         this[sessionManager] = new SessionManager();
 
-        this.bothPlayersReadyEventListener = this.bothPlayersReadyEventListener.bind(this);
-        this.onClientDisconnect = this.onClientDisconnect.bind(this);
-
         this.initialize();
         this.listenToEvents();
     }
-
-    listenToEvents(){
-
-        eventEmmiter.on(EventEnums.SEND_SERVER_GAME_STATUS_READY, this.bothPlayersReadyEventListener);
-        eventEmmiter.on(EventEnums.CLIENT_DISCONNECTED, this.onClientDisconnect);
-    }
-
     /**
      * Initializes routes.
      */
@@ -72,7 +62,10 @@ class Server{
 
         this.startListening();
     }
+    listenToEvents(){
 
+        eventEmmiter.on(EventEnums.CLIENT_DISCONNECTED, this.onClientDisconnect.bind(this));
+    }
     initializeServer(){
 
         this[server] = http.Server(this.getApp());
@@ -104,7 +97,6 @@ class Server{
 
         this[socketManager] = new SocketManager(server, socketIo, this.getMainController());
     }
-
     /**
      * Method responsible for running routes.
      */
@@ -123,15 +115,8 @@ class Server{
      * @param {string}  data.socketId
      */
     onClientDisconnect(data){
-
-        this.getMainController().removePlayerFromGameModel(data.socketId);
-    }
-    /**
-     * Callback function triggered when router notifies server, that second player(black) has logged into game.
-     */
-    bothPlayersReadyEventListener(){
-
-        this.getSocketManager().emitEventToAll(EventEnums.BOTH_PLAYERS_READY);
+        //TODO
+        console.log('client disconnected');
     }
     /**
      * Returns http routes instance.

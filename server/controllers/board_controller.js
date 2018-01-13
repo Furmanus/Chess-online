@@ -2,12 +2,9 @@
  * @author Lukasz Lach
  */
 
-const GameBoardModel = require('./../models/gameboard_model');
 const Observer = require('./../../core/observer');
-const FigureEnums = require('./../../enums/figures');
-const calculateMoves = require('./../helper/moves_calculation');
 
-const gameBoardModel = Symbol();
+const databaseConnection = Symbol();
 
 /**
  * @class
@@ -16,128 +13,46 @@ const gameBoardModel = Symbol();
 class BoardController extends Observer{
     /**
      * @constructor
+     * @param {DatabaseConnection}  databaseConnectionObject    Object responsible for connecting to database.
      */
-    constructor(){
+    constructor(databaseConnectionObject){
 
         super();
-        /**@type {GameBoardModel}*/
-        this[gameBoardModel] = new GameBoardModel();
+        /**@type {DatabaseConnection}*/
+        this[databaseConnection] = databaseConnectionObject;
     }
     /**
-     * Returns model of game board.
-     * @returns {GameBoardModel}
+     * Method responsible for returning promise with game data.
+     * @param {string}  gameId  Unique game id from database.
+     * @returns {Promise}
      */
-    getGameBoardModel(){
+    getGameDataByIdPromise(gameId){
 
-        return this[gameBoardModel];
+        return this.getDatabaseConnection().getGameDataById(gameId);
     }
     /**
-     * Returns array of chosen figure possible moves coordinates.
-     * @param {{x: number, y: number}}  coordinates
-     * @param {string}                  colour
-     * @returns {Array.{x: number, y: number}}
+     * Returns database connection object.
+     * @returns {DatabaseConnection}
      */
-    getFigurePossibleMoves(coordinates, colour){
+    getDatabaseConnection(){
 
-        const figure = this.getGameBoardModel().getFigure(coordinates);
-        const boardState = this.getBoardState();
-
-        if(!figure || figure.getOwner() !== colour){
-
-            return {};
-        }
-
-        return calculateMoves(figure, coordinates, boardState);
-    }
-    getBoardState(){
-
-        return this.getGameBoardModel().getDataToSerialization();
-    }
-    setCurrentFigurePossibleMoves(possibleMoves){
-
-        this.getGameBoardModel().setCurrentFigurePossibleMoves(possibleMoves);
-    }
-    resetCurrentFigurePossibleMoves(){
-
-        this.getGameBoardModel().resetCurrentFigurePossibleMoves();
+        return this[databaseConnection];
     }
     /**
-     * Method responsible for checking whether move choosen by player is legal.
-     * @param {{x: number, y: number}}  coordinates
-     * @returns {boolean}
+     * Method responsible for actualization of database when player moves his figure.
+     * @param {Object}  data                    Object with information about movement and game
+     * @param {number}  data.sourceX            Horizontal coordinate of source cell
+     * @param {number}  data.sourceY            Vertical coordinate of source cell
+     * @param {number}  data.targetX            Horizontal coordinate of target cell
+     * @param {number}  data.targetY            Vertical coordinate of target cell
+     * @param {string}  data.gameId             Unique game id from database
+     * @param {string}  data.user               User name which made move
+     * @param {string}  data.colour             Colour of player that made his move
+     * @returns {Promise}
      */
-    checkIfChosenCoordinatesMeetsPossibleMoves(coordinates){
+    moveFigure(data){
 
-        const playerPossibleMoves = this.getGameBoardModel().getCurrentFigurePossibleMoves();
-
-        for(let item of playerPossibleMoves){
-
-            if(coordinates.x === item.x && coordinates.y === item.y){
-
-                return true;
-            }
-        }
-
-        return false;
-    }
-    moveFigure(sourceCoords, targetCoords){
-
-        const sourceCell = this.getGameBoardModel().getCell(sourceCoords);
-        const targetCell = this.getGameBoardModel().getCell(targetCoords);
-        const movedFigure = sourceCell.getFigure()
-        const capturedFigure = targetCell.getFigure();
-
-        targetCell.setFigure(movedFigure);
-        sourceCell.removeFigure();
-
-        if(movedFigure.getFigureName() === FigureEnums.PAWN && !movedFigure.hasFigureMoved()){
-
-            movedFigure.markFigureAsMoved();
-        }
-
-        if(capturedFigure){
-
-            this.getGameBoardModel().setFigureCapturedLastTurn(capturedFigure.getFigureName());
-        }else{
-
-            this.getGameBoardModel().setFigureCapturedLastTurn('');
-        }
-
-        return movedFigure.getFigureName();
-    }
-
-    /**
-     * Method which calculates and returns array of coordinates of player figure which are able to move in this turn.
-     * @param {string}  player  Player colour.
-     * @returns {Array}
-     */
-    getPlayerFiguresAbleToMove(player){
-
-        let examinedFigure;
-        const figuresAbleToMove = [];
-
-        for(let i=0; i<8; i++){
-
-            for(let j=0; j<8; j++){
-
-                examinedFigure = this.getGameBoardModel().getCell({x: i, y: j}).getFigure();
-
-                if(examinedFigure && examinedFigure.getOwner() === player && this.getFigurePossibleMoves({x: i, y: j}, player).length){
-
-                    figuresAbleToMove.push({x: i, y: j});
-                }
-            }
-        }
-
-        return figuresAbleToMove;
-    }
-    /**
-     * Returns figure captured last turn from game board model.
-     * @returns {string}
-     */
-    getFigureCapturedLastTurn(){
-
-        return this.getGameBoardModel().getFigureCapturedLastTurn();
+        return this.getDatabaseConnection().registerPlayerMove(data.gameId, data.colour, data.sourceX, data.sourceY, data.targetX, data.targetY);
     }
 }
 
