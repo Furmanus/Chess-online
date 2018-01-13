@@ -49,17 +49,47 @@ class SocketManager{
         this.listenOnEvent('connection', this.connectionEventListener);
     }
     /**
+     * Method responsible for actualization of database when player moves his figure.
+     * @param {Object}  data                    Object with information about movement and game
+     * @param {number}  data.sourceX            Horizontal coordinate of source cell
+     * @param {number}  data.sourceY            Vertical coordinate of source cell
+     * @param {number}  data.targetX            Horizontal coordinate of target cell
+     * @param {number}  data.targetY            Vertical coordinate of target cell
+     * @param {string}  data.gameId             Unique game id from database
+     * @param {string}  data.user               User name which made move
+     * @param {string}  data.colour             Colour of player that made his move
+     */
+    playerMoveEventListener(data){
+
+        let updatedData;
+
+        this.getMainController().moveFigure(data).then(function(databaseData){
+
+            updatedData = Object.assign(databaseData, {
+
+                sourceX: data.sourceX,
+                sourceY: data.sourceY,
+                targetX: data.targetX,
+                targetY: data.targetY
+            });
+
+            this.emitEventToAll(EventEnums.PLAYER_MOVED, updatedData);
+        }.bind(this)).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    /**
      * Callback function triggered after successful client socket connection.
      * @param socket
      */
     connectionEventListener(socket){
 
-        //const playerColour = this.getMainController().getInitialPlayerData(socket.id);
-
         socket.on('disconnect', function(){
 
             eventEmmiter.emit(EventEnums.CLIENT_DISCONNECTED, {socketId: socket.id});
         });
+        socket.on(EventEnums.SEND_PLAYER_MOVE, this.playerMoveEventListener.bind(this));
     }
     /**
      * Method responsible for making socket listen to certain event.
@@ -85,17 +115,6 @@ class SocketManager{
     getMainController(){
 
         return this[mainController];
-    }
-    /**
-     * Method responsible for emmiting event when one player successfully moved one of his figures.
-     * @param {Object}                  data                Additional data to pass to client.
-     * @param {string}                  data.newPlayer      Currently active player(AFTER this move).
-     * @param {{x: number, y: number}}  data.sourceCoords   Source coordinates of moved figure.
-     * @param {{x: number, y: number}}  data.targetCoords   Target coordinates of moved figure.
-     */
-    emitMoveEventToAll(data){
-
-        this.emitEventToAll(EventEnums.PLAYER_MOVED, data);
     }
     /**
      * Method responsible for emmiting event to specific client socket.

@@ -3,15 +3,12 @@
  */
 
 const boardControllerClass = require('./board_controller');
-const GameModel = require('./../models/game_model');
 const Observer = require('./../../core/observer');
-const ColourEnums = require('./../../enums/colours');
 const DatabaseConnection = require('./../helper/database');
 const BoardHelper = require('./../helper/board_helper');
 
 //private variables declaration
 const boardController = Symbol();
-const gameModel = Symbol();
 const databaseConnection = Symbol();
 
 /**
@@ -25,13 +22,44 @@ class MainController extends Observer{
     constructor(){
 
         super();
-        /**@type {BoardController}*/
-        this[boardController] = new boardControllerClass();
-        /**@type {GameModel}*/
-        this[gameModel] = new GameModel();
         /**@type {DatabaseConnection}*/
         this[databaseConnection] = new DatabaseConnection();
+        /**@type {BoardController}*/
+        this[boardController] = new boardControllerClass(this[databaseConnection]);
     }
+    /*
+    --------------------------GAME BOARD METHODS---------------------------------------
+     */
+    /**
+     * Method responsible for returning promise with game data.
+     * @param {string}  gameId  Unique game id from database.
+     * @returns {Promise}
+     */
+    getGameDataByIdPromise(gameId){
+
+        return this.getBoardController().getGameDataByIdPromise(gameId);
+    }
+    /**
+     * Method responsible for actualization of database when player moves his figure.
+     * @param {Object}  data                    Object with information about movement and game
+     * @param {number}  data.sourceX            Horizontal coordinate of source cell
+     * @param {number}  data.sourceY            Vertical coordinate of source cell
+     * @param {number}  data.targetX            Horizontal coordinate of target cell
+     * @param {number}  data.targetY            Vertical coordinate of target cell
+     * @param {string}  data.gameId             Unique game id from database
+     * @param {string}  data.user               User name which made move
+     * @param {string}  data.colour             Colour of player that made his move
+     * @returns {Promise}
+     */
+    moveFigure(data){
+
+        return this.getBoardController().moveFigure(data);
+    }
+
+    /*
+     -------------------------LOGIN, DASHBOARD PAGES METHODS----------------------------
+     */
+
     /**
      * Method responsible for creating new game in database.
      * @param {string}  userName
@@ -91,6 +119,15 @@ class MainController extends Observer{
         return this.getDatabaseConnection().changeBlackPlayerNameInGame(gameId, blackPlayer);
     }
     /**
+     * Method which for given user login makes query to database for that login. Returns promise, which resolved returns user data from database.
+     * @param {string}  userLogin
+     * @returns {Promise<T>}
+     */
+    getDatabaseUserDataPromise(userLogin){
+
+        return this.getDatabaseConnection().findUserByName(userLogin);
+    }
+    /**
      * Returns board controller.
      * @returns {BoardController}
      */
@@ -99,153 +136,12 @@ class MainController extends Observer{
         return this[boardController];
     }
     /**
-     * Returns game model.
-     * @returns {GameModel}
-     */
-    getGameModel(){
-
-        return this[gameModel];
-    }
-    /**
      * Returns database connection object.
      * @returns {DatabaseConnection}
      */
     getDatabaseConnection(){
 
         return this[databaseConnection];
-    }
-    /**
-     * Changes active player in game model.
-     * @returns {undefined|string}
-     */
-    toggleActivePlayer(){
-
-        const currentActivePlayer = this.getGameModel().getActivePlayer();
-
-        return this.getGameModel().setActivePlayer(currentActivePlayer === ColourEnums.WHITE ? ColourEnums.BLACK : ColourEnums.WHITE);
-    }
-    /**
-     * Sets active player in game model.
-     * @param {string} playerColour
-     */
-    setActivePlayer(playerColour){
-
-        if(!Object.values(ColourEnums).includes(playerColour)){
-
-            throw new Error('Player color has to be either black or white.')
-        }
-
-        this.getGameModel().setActivePlayer(playerColour);
-    }
-    /**
-     * Returns colour of active player.
-     * @returns {string|undefined}
-     */
-    getActivePlayer(){
-
-        return this.getGameModel().getActivePlayer();
-    }
-    /**
-     * Removes player from game model active players object.
-     * @param {string}  id  Socket id of player to remove.
-     */
-    removePlayerFromGameModel(id){
-
-        this.getGameModel().removePlayer(id);
-    }
-    /**
-     * Returns currently highlighted cell coordinates or null if no cell was selected.
-     * @returns {*|{x: number, y: number}}
-     */
-    getCurrentlyHighlightedCell(){
-
-        return this.getGameModel().getCurrentlyHighlightedCell();
-    }
-    /**
-     * Sets currently highlighted cell in game model.
-     * @param {number}  x
-     * @param {number}  y
-     */
-    setCurrentlyHighlightedCell(x, y){
-
-        this.getGameModel().setCurrentlyHighlightedCell(x, y);
-    }
-    /**
-     * Resets currently highlighted cell in game model by setting it to null.
-     */
-    resetCurrentlyHighlightedCell(){
-
-        this.getGameModel().resetCurrentlyHighlightedCell();
-    }
-    /**
-     * Returns array of figure possible moves coordinates.
-     * @param {{x: number, y: number}}  coordinates
-     * @param {string}                  colour
-     * @returns {Array.{x: number, y: number}}
-     */
-    getFigureMoves(coordinates, colour){
-
-        return this.getBoardController().getFigurePossibleMoves(coordinates, colour);
-    }
-    /**
-     * Method responsible for obtaining and returning object containg state of game board.
-     * @return {Object}
-     */
-    getBoardState(){
-
-        return this.getBoardController().getBoardState();
-    }
-    /**
-     * Gets initial player data from game model.
-     * @param   {string}    id
-     * @returns {{colour: string}}
-     */
-    getInitialPlayerData(id){
-
-        return this.getGameModel().getPlayerColour(id);
-    }
-    setCurrentFigurePossibleMoves(possibleMoves){
-
-        this.getBoardController().setCurrentFigurePossibleMoves(possibleMoves);
-    }
-    resetCurrentFigurePossibleMoves(){
-
-        this.getBoardController().resetCurrentFigurePossibleMoves();
-    }
-    /**
-     * Method responsible for checking whether move choosen by player is legal.
-     * @param {{x: number, y: number}}  coordinates
-     */
-    checkIfChosenCoordinatesMeetsPossibleMoves(coordinates){
-
-        return this.getBoardController().checkIfChosenCoordinatesMeetsPossibleMoves(coordinates);
-    }
-    moveFigure(sourceCoords, targetCoords){
-
-        return this.getBoardController().moveFigure(sourceCoords, targetCoords);
-    }
-    getActivePlayerFiguresToMove(){
-
-        const activePlayer = this.getActivePlayer();
-
-        return this.getBoardController().getPlayerFiguresAbleToMove(activePlayer);
-    }
-    /**
-     * Returns figure captured last turn from game board model.
-     * @returns {string}
-     */
-    getFigureCapturedLastTurn(){
-
-        return this.getBoardController().getFigureCapturedLastTurn();
-    }
-    /**
-     * Method which for given user login makes query to database for that login. Returns promise, which resolved returns user data from database.
-     * @param {string}  userLogin
-     * @returns {Promise<T>}
-     */
-    getDatabaseUserDataPromise(userLogin){
-
-        return this.getDatabaseConnection().findUserByName(userLogin);
     }
 }
 

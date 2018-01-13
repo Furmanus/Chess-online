@@ -4,12 +4,12 @@ const Utility = {
 
     /**
      * Method which executes provided callback function on every point of bresenham line between points (x1, y1) and (x2, y2).
-     * @param {number}      x1 Horizontal(row) coordinate of starting point.
-     * @param {number}      y1 Vertical(column) coordinate of starting point.
-     * @param {number}      x2 Horizontal(row) coordinate of target point.
-     * @param {number}      y2 Vertical(column) coordinate of target point.
-     * @param {number}      delay Delay in executing each step of algorithms, in miliseconds.
-     * @param {function}    callback Callback function to execute on every point of bresenham line.
+     * @param {number}      x1          Horizontal(row) coordinate of starting point.
+     * @param {number}      y1          Vertical(column) coordinate of starting point.
+     * @param {number}      x2          Horizontal(row) coordinate of target point.
+     * @param {number}      y2          Vertical(column) coordinate of target point.
+     * @param {number}      delay       Delay in executing each step of algorithms, in miliseconds.
+     * @param {function}    callback    Callback function to execute on every point of bresenham line.
      */
     bresenham: function(x1, y1, x2, y2, delay, callback){
 

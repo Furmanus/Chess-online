@@ -4,7 +4,9 @@
 
 const mongo = require('mongodb');
 const MongoClient = mongo.MongoClient;
-const DatabaseEnums = require('./../../enums/database_enums');
+const databaseEnums = require('./../../enums/database_enums');
+const colourEnums = require('./../../enums/colours');
+const boardHelper = require('./../helper/board_helper');
 const databaseUrl = 'mongodb://chessadmin:chessadmin@ds129906.mlab.com:29906/chess';
 
 const database = Symbol();
@@ -35,7 +37,7 @@ class DatabaseConnection{
 
         return this.makeDatabaseConnection().then(function(db){
 
-            return db.collection(DatabaseEnums.USERS).insertOne(databaseDocument);
+            return db.collection(databaseEnums.USERS).insertOne(databaseDocument);
         }).catch(function(error){
 
             console.error(error);
@@ -51,7 +53,7 @@ class DatabaseConnection{
 
         return this.makeDatabaseConnection().then(function(db){
 
-            return db.collection(DatabaseEnums.USERS).find({user}).toArray();
+            return db.collection(databaseEnums.USERS).find({user}).toArray();
         });
     }
     /**
@@ -75,7 +77,7 @@ class DatabaseConnection{
 
             return databaseConnectionObject.makeDatabaseConnection().then(function(db){
 
-                return db.collection(DatabaseEnums.USERS).updateOne({user}, userData);
+                return db.collection(databaseEnums.USERS).updateOne({user}, userData);
             }).catch(function(error){
 
                 console.log(error);
@@ -104,7 +106,7 @@ class DatabaseConnection{
 
         return this.makeDatabaseConnection().then(function(db){
 
-            return db.collection(DatabaseEnums.GAMES).insertOne(databaseDocument);
+            return db.collection(databaseEnums.GAMES).insertOne(databaseDocument);
         }).catch(function(error){
 
             console.log(error);
@@ -121,7 +123,7 @@ class DatabaseConnection{
 
         return this.makeDatabaseConnection().then(function(db){
 
-            return db.collection(DatabaseEnums.GAMES).findOne({_id: new ObjectID(gameId)});
+            return db.collection(databaseEnums.GAMES).findOne({_id: new ObjectID(gameId)});
         }).catch(function(error){
 
             console.log(error);
@@ -135,7 +137,7 @@ class DatabaseConnection{
 
         return this.makeDatabaseConnection().then(function(db){
 
-            return db.collection(DatabaseEnums.GAMES).find({}).toArray();
+            return db.collection(databaseEnums.GAMES).find({}).toArray();
         }).catch(function(error){
 
             console.log(error);
@@ -168,7 +170,13 @@ class DatabaseConnection{
 
             return databaseObject.makeDatabaseConnection().then(function(db){
 
-                return db.collection(DatabaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData);
+                return db.collection(databaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData).then(function(updatedDb){
+
+                    return databaseObject.getGameDataById(gameId);
+                }).catch(function(error){
+
+                    console.log(error);
+                });
             }).catch(function(error){
 
                 console.log(error);
@@ -194,6 +202,27 @@ class DatabaseConnection{
 
             return databaseHelperObject.addGameToUserGames(blackPlayer, gameId);
         }).catch(function(error){
+
+            console.log(error);
+        });
+    }
+    registerPlayerMove(gameId, activePlayer, sourceX, sourceY, targetX, targetY){
+
+        const newActivePlayer = activePlayer === colourEnums.WHITE ? colourEnums.BLACK : colourEnums.WHITE;
+        let updatedBoardData;
+
+        return this.getGameDataById(gameId).then(function(data){
+
+            updatedBoardData = boardHelper.updateBoardDataByPlayerMove(data.boardData, {
+
+                sourceX,
+                sourceY,
+                targetX,
+                targetY
+            });
+
+            return this.updateGameData(gameId, newActivePlayer, updatedBoardData);
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });

@@ -2,8 +2,6 @@
  * @author Lukasz Lach
  */
 
-const FigureEnums = require('./../../../enums/figures');
-
 const moves = {
 
     pawn: {
