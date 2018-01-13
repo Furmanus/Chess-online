@@ -48,30 +48,26 @@ class LoginPage extends Page{
      */
     attachEvents(){
 
-        this[submitElement].addEventListener('click', this.validateFormData);
-        this[registerElement].addEventListener('click', this.onRegisterButtonClick);
+        this[submitElement].addEventListener('click', this.onLoginButtonClick.bind(this));
+        this[registerElement].addEventListener('click', this.onRegisterButtonClick.bind(this));
     }
     /**
      * Method responsible for binding methods defined in class to its instance.
      */
     bindMethods(){
 
-        this.validateFormData = this.validateFormData.bind(this);
         this.validateUserLogin = this.validateUserLogin.bind(this);
         this.showLoader = this.showLoader.bind(this);
         this.hideLoader = this.hideLoader.bind(this);
-        this.onRegisterButtonClick = this.onRegisterButtonClick.bind(this);
     }
     /**
      * Method responsible for validating form data.
      */
-    validateFormData(){
+    onLoginButtonClick(){
 
         const login = this[userLoginElement].value;
         const password = this[userPasswordElement].value;
-        const main = this[mainElement];
         const hideLoader = this.hideLoader;
-        const loginPageObject = this;
 
         if(this.hasError){
 
@@ -84,15 +80,15 @@ class LoginPage extends Page{
 
             if(!data.loginSuccessful){
 
-                loginPageObject.showError(data.errorMessage);
+                this.showError(data.errorMessage);
             }else{
 
                 window.location = `/dashboard?user=${login}`;
             }
 
             hideLoader();
-            loginPageObject.enableButtons();
-        });
+            this.enableButtons();
+        }.bind(this));
     }
     onRegisterButtonClick(){
 
@@ -100,13 +96,11 @@ class LoginPage extends Page{
         const passwordValidationResult = this.validateUserPassword();
         const loginValue = this[userLoginElement].value;
         const passwordValue = this[userPasswordElement].value;
-        const loginPageObject = this;
 
         if(this.hasError){
 
             this.clearErrors();
         }
-
         if(loginValidationResult.result && passwordValidationResult){
 
             this.disableButtons();
@@ -125,8 +119,8 @@ class LoginPage extends Page{
                     DomHelper.showGrowler(data.message);
                 }
 
-                loginPageObject.enableButtons();
-            }).catch(function(error){
+                this.enableButtons();
+            }.bind(this)).catch(function(error){
 
                 console.log(error);
             });

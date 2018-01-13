@@ -83,21 +83,20 @@ class Router{
     createGame(req, res){
 
         const user = req.body.user;
-        const thisRouter = this;
         let createdGameId;
 
         this.getMainController().createNewGame(user).then(function(data){
 
             createdGameId = data.ops[0]._id;
 
-            thisRouter.getMainController().addGameToUser(user, createdGameId).then(function(){
+            this.getMainController().addGameToUser(user, createdGameId).then(function(){
 
                 res.send(data.ops[0]);
             }).catch(function(error){
 
                 console.log(error);
             });
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
@@ -111,7 +110,6 @@ class Router{
 
         const username = req.body.user;
         const password = req.body.password;
-        const routerObject = this;
 
         //we check if username already exist in database
         this.getMainController().getUserDataFromDatabase(username).then(function(data){
@@ -122,17 +120,17 @@ class Router{
                 res.send({result: false, message: 'User already exist'});
             }else{
                 //in other case we register user. After user is registered in database, we set user in session and register him and his sessionID in users map
-                routerObject.getMainController().registerUserInDatabase(username, password).then(function(data){
+                this.getMainController().registerUserInDatabase(username, password).then(function(){
 
-                    routerObject.getSessionManager().getLoggedUsersMap().set(username, req.sessionID);
+                    this.getSessionManager().getLoggedUsersMap().set(username, req.sessionID);
                     req.session.user = username;
                     res.send({result: true, message: 'User successfully registered'});
-                }).catch(function(error){
+                }.bind(this)).catch(function(error){
 
                     console.log(error);
                 });
             }
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
@@ -169,7 +167,7 @@ class Router{
             });
         }).catch(function(error){
 
-
+            console.log(error);
         });
     }
     /**
@@ -186,7 +184,7 @@ class Router{
             console.log(data);
         }).catch(function(error){
 
-
+            console.log(error);
         });
     }
     /**
@@ -247,7 +245,6 @@ class Router{
         const user = req.body.user;
         const gameToJoinObject = req.body.data;
         const id = gameToJoinObject._id.toString();
-        const routerObject = this;
         let examinedGame;
 
         this.getMainController().getAllGamesData().then(function(data){
@@ -261,7 +258,7 @@ class Router{
 
                  if(examinedGame.white && !examinedGame.black){
 
-                     routerObject.getMainController().joinBlackPlayerToGame(id, user).then(function(joinResultData){
+                     this.getMainController().joinBlackPlayerToGame(id, user).then(function(joinResultData){
 
                          res.send({result: true, message: 'You joined chosen game'});
                      }).catch(function(error){
@@ -276,7 +273,7 @@ class Router{
 
                  res.send({result: false, message: 'Game not found'});
              }
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
@@ -365,8 +362,6 @@ class Router{
     }
     playerLoginHandler(req, res){
 
-        const router = this;
-
         this.getMainController().getDatabaseUserDataPromise(req.body.login).then(function(data){
 
             let requestResult = {};
@@ -377,13 +372,20 @@ class Router{
                 requestResult.errorMessage = 'Invalid login or password.';
             }else{
 
-                router.getSessionManager().getLoggedUsersMap().set(req.body.login, req.sessionID);
-                req.session.user = req.body.login;
-                requestResult.loginSuccessful = true;
+                if(this.getSessionManager().getLoggedUsersMap().get(req.body.login)){
+
+                    requestResult.loginSuccessful = false;
+                    requestResult.errorMessage = 'User already logged in.'
+                }else {
+
+                    this.getSessionManager().getLoggedUsersMap().set(req.body.login, req.sessionID);
+                    req.session.user = req.body.login;
+                    requestResult.loginSuccessful = true;
+                }
             }
 
             res.send(requestResult);
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });

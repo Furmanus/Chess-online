@@ -45,12 +45,11 @@ class Page{
     disableButtons(){
 
         const buttons = document.querySelectorAll('input[type=button]');
-        const pageObject = this;
 
         buttons.forEach(function(buttonItem){
 
-            pageObject.disableElement(buttonItem);
-        });
+            this.disableElement(buttonItem);
+        }.bind(this));
     }
     /**
      * Method responsible for enabling buttons on page. Can be overriden in certain pages objects.
@@ -58,12 +57,11 @@ class Page{
     enableButtons(){
 
         const buttons = document.querySelectorAll('input[type=button]');
-        const pageObject = this;
 
         buttons.forEach(function(buttonItem){
 
-            pageObject.enableElement(buttonItem);
-        });
+            this.enableElement(buttonItem);
+        }.bind(this));
     }
     /**
      * Method responsible for adding class to HTML element classlist.
