@@ -119,7 +119,7 @@ class DashboardPage extends Page{
 
                     data.forEach(function(item){
 
-                        dashBoardPageObject.addItemToSliderMenu(item);
+                        dashBoardPageObject.addItemToSliderMenu(item, user);
                     });
                 }else{
 
@@ -162,7 +162,7 @@ class DashboardPage extends Page{
         Ajax.post('/create_game', {user}).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
-            dashboardPageObject.addItemToGamesList(data);
+            dashboardPageObject.addItemToGamesList(data, user);
             dashboardPageObject.hideLoader();
             dashboardPageObject.validateGamesQuantity();
 
@@ -292,7 +292,7 @@ class DashboardPage extends Page{
 
                 Object.defineProperty(gameDataObject, 'black', {value: user});
                 dashboardObject[sliderMenuElement].removeChild(linkParentElement);
-                dashboardObject.addItemToGamesList(gameDataObject);
+                dashboardObject.addItemToGamesList(gameDataObject, user);
             }
 
             DomHelper.showGrowler(data.message);
