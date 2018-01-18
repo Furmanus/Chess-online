@@ -47,6 +47,8 @@ class SocketManager{
     attachEventListeners(){
 
         this.listenOnEvent('connection', this.connectionEventListener);
+
+        this.getMainController().on(this, EventEnums.CLIENT_DISCONNECTED, this.onMainControllerRemovePlayerFromTemporaryGameData.bind(this));
     }
     /**
      * Method responsible for actualization of database when player moves his figure.
@@ -80,6 +82,34 @@ class SocketManager{
         });
     }
     /**
+     * Method responsible for sending to all connected client information about player login to game board page.
+     * @param {Object}  data    Data received from client who just logged to game board page.
+     */
+    onPlayerGameBoardLogin(data){
+
+        this.getMainController().registerTemporaryPlayerInGameData(data.gameId, {
+
+            user: data.user,
+            socketId: data.socketId,
+            colour: data.colour
+        });
+        this.emitEventToAll(EventEnums.SERVER_PLAYER_LOGIN, data);
+    }
+    /**
+     * Callback method called after main controller notifies socket manager that user was removed from temporary game data.
+     * @param {Object}  data
+     * @param {string}  data.user
+     * @param {string}  data.colour
+     * @param {string}  data.socketId
+     */
+    onMainControllerRemovePlayerFromTemporaryGameData(data){
+
+        const socketId = data.socketId;
+
+        delete data.socketId;
+        this.emitEventToSpecifiedClient(socketId, EventEnums.SERVER_PLAYER_DISCONNECTED, data);
+    }
+    /**
      * Callback function triggered after successful client socket connection.
      * @param socket
      */
@@ -87,9 +117,11 @@ class SocketManager{
 
         socket.on('disconnect', function(){
 
+            this.getMainController().removeUserFromTemporaryPlayerInGameData(socket.id);
             eventEmmiter.emit(EventEnums.CLIENT_DISCONNECTED, {socketId: socket.id});
-        });
+        }.bind(this));
         socket.on(EventEnums.SEND_PLAYER_MOVE, this.playerMoveEventListener.bind(this));
+        socket.on(EventEnums.SEND_PLAYER_LOGIN, this.onPlayerGameBoardLogin.bind(this));
     }
     /**
      * Method responsible for making socket listen to certain event.
@@ -123,6 +155,12 @@ class SocketManager{
      * @param {Object}      data        Additional data to send with event.
      */
     emitEventToSpecifiedClient(clientId, eventType, data = {}){
+
+        if(!this.getSocketIo().sockets.connected[clientId]){
+
+            console.warn('Invalid socket id');
+            return;
+        }
 
         this.getSocketIo().sockets.connected[clientId].emit(eventType, data);
     }

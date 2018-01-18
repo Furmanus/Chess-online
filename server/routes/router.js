@@ -144,7 +144,9 @@ class Router{
 
         const user = req.body.user;
         const gameId = req.body.gameId;
+        const usersLoggedInGame = this.getMainController().getUserLoggedInGame(gameId);
         let colour;
+        let opponentColour;
 
         this.getMainController().getGameDataByIdPromise(gameId).then(function(data){
 
@@ -159,11 +161,21 @@ class Router{
                 throw new Error('User is not recognized as active player in this game');
             }
 
+            if(data.black && data.black !== user){
+
+                opponentColour = ColourEnums.BLACK;
+            }else if(data.white !== user){
+
+                opponentColour = ColourEnums.WHITE;
+            }
+
             res.send({
 
-                colour: colour,
+                colour,
+                opponentColour,
                 activePlayer: data.activePlayer,
-                boardData: data.boardData
+                boardData: data.boardData,
+                users: usersLoggedInGame
             });
         }).catch(function(error){
 
@@ -223,7 +235,11 @@ class Router{
             if(examinedGameObject && (whitePlayerValidation || blackPlayerValidation)){
                 //TODO w przypadku gdy czarny jest nullem i user nie jest biały, wpisać usera do bazy jako czarnego gracza
                 req.session.touch(req.sessionID);
-                res.render('board');
+                res.render('board', {
+
+                    whitePlayer: examinedGameObject.white.toString(),
+                    blackPlayer: examinedGameObject.black ? examinedGameObject.black.toString() : 'waiting for player to join...'
+                });
             }else{
                 //TODO zamienić na render strony 403 forbidden access
                 console.log('forbidden access');

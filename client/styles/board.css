@@ -1,5 +1,4 @@
 html, body{
-
     height: 100%;
     padding: 0;
     margin: 0;
@@ -8,33 +7,49 @@ html, body{
     overflow: hidden;
 }
 body{
-
     background-color: #E4DBBF;
-
 }
 .header{
-
     height: 10%;
     border-bottom: 1px solid black;
+    font-size: 24px;
+}
+.header p{
+    margin-top: 20px;
+    display: inline-block;
+    position: relative;
+}
+.header span{
+    margin-left: 12px;
+    display: inline-block;
+    font-size: 12px;
+}
+.header span.online{
+    color: green;
+}
+.header span.offline{
+    color: slategray;
+}
+.header #white{
+    left: 10%;
+}
+.header #black{
+    left: 50%;
 }
 .main{
-
     height: 80%;
     border-bottom: 1px solid black;
 }
 .footer{
-
     height: 10%;
 }
 .main-board{
-
     position: absolute;
     top: 10%;
     width: 70%;
     height: 80%;
 }
 .main-side{
-
     position: absolute;
     top: 10%;
     left: 70%;
@@ -43,7 +58,6 @@ body{
     border-left: 1px solid black;
 }
 #board{
-
     position: absolute;
     width: 424px;
     height: 424px;
