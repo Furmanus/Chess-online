@@ -6,6 +6,7 @@ const userName = Symbol();
 const playerColour = Symbol();
 const gameId = Symbol();
 const activePlayer = Symbol();
+const opponentColour = Symbol();
 
 /**
  * @constructor
@@ -20,6 +21,8 @@ class GameModel{
         this[gameId] = initialGameData.id;
         /**@type {string}*/
         this[playerColour];
+        /**@type {string}*/
+        this[opponentColour];
         /**@type {string}*/
         this[activePlayer];
     }
@@ -39,6 +42,22 @@ class GameModel{
 
         this[playerColour] = colour;
         return this;
+    }
+    /**
+     * Sets opponent colour.
+     * @param {string}  colour
+     */
+    setOpponentColour(colour){
+
+        this[opponentColour] = colour;
+    }
+    /**
+     * Returns opponent colour;
+     * @returns {string}
+     */
+    getOpponentColour(){
+
+        return this[opponentColour];
     }
     /**
      * Returns game id.

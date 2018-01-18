@@ -52,7 +52,6 @@ class MainController extends Observer{
      */
     initialize(){
 
-
     }
     /**
      * Method responsible for listening on events.
@@ -61,8 +60,35 @@ class MainController extends Observer{
 
         this.getSocketClientManager().on(this, EventEnums.SOCKET_CONNECTION_ESTABLISHED, this.fetchUserDataFromServer.bind(this));
         this.getSocketClientManager().on(this, EventEnums.CLIENT_NOTIFY_MOVE_READY, this.onPlayerMoveReady.bind(this));
+        this.getSocketClientManager().on(this, EventEnums.SOCKET_TO_CONTROLLER_PLAYER_LOGIN, this.onPlayerLogin.bind(this));
+        this.getSocketClientManager().on(this, EventEnums.SOCKET_TO_CONTROLLER_PLAYER_DISCONNECT, this.onPlayerDisconnect.bind(this));
 
         this.getBoardController().on(this, EventEnums.MOVE_READY_TO_SEND_SERVER, this.onMoveReadyToSendToServer.bind(this));
+    }
+    /**
+     * Method responsible for sending to server information about player login to game board page.
+     */
+    sendToServerPlayerLogin(){
+
+        const user = this.getGameModel().getUserName();
+
+        this.getSocketClientManager().sendToServerPlayerOnline({user});
+    }
+    /**
+     * Callback method called after receiving from server information about player login into game board page.
+     * @param {Object}  data    Data received from player client who just logged into game board page.
+     */
+    onPlayerLogin(data){
+
+        this.getMainView().setPlayerOnline(data);
+    }
+    /**
+     * Callback method called after receiving from server information about player disconnecting from game board page.
+     * @param {Object}  data    Data received from player client who just disconnected from game board page.
+     */
+    onPlayerDisconnect(data){
+
+        this.getMainView().setPlayerOffline(data);
     }
     /**
      * Method responsible for sending initial AJAX post request to server.
@@ -74,21 +100,46 @@ class MainController extends Observer{
 
         Ajax.post('/initial_player_data', {user, gameId}).then(function(data){
 
+            const playerColour = data.colour;
+            const opponentColour = data.opponentColour;
+            let wasOpponentLoginStateSet = false;
+
             Ajax.validateAjaxResponseRedirect(data);
 
-            this.getGameModel().setPlayerColour(data.colour);
+            this.getGameModel().setPlayerColour(playerColour);
+            this.getGameModel().setOpponentColour(opponentColour)
             this.getGameModel().setActivePlayer(data.activePlayer);
             this.getBoardController().buildBoardModel(data.boardData);
             this.getBoardController().setBoardStateInView(data.boardData);
             this.getPanelController().addMessageInView(`Welcome! You are playing ${data.colour} pieces.`);
+            this.getSocketClientManager().sendToServerPlayerOnline({
 
-            if(data.colour === data.activePlayer){
+                user,
+                gameId,
+                colour: playerColour
+            });
+
+            if(playerColour === data.activePlayer){
 
                 this.getPanelController().addMessageInView('It is your move now.');
                 this.getBoardController().listenToViewEvents();
             }else{
 
                 this.getPanelController().addMessageInView('It is your opponent move now.');
+            }
+
+            for(let user in data.users){
+
+                if(data.users[user].colour) {
+
+                    wasOpponentLoginStateSet = true;
+                    this.getMainView().setPlayerOnline(data.users[user]);
+                }
+            }
+
+            if(!wasOpponentLoginStateSet && opponentColour){
+
+                this.getMainView().setPlayerOffline({colour: opponentColour});
             }
         }.bind(this)).catch(function(error){
 

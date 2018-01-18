@@ -6,6 +6,8 @@ const boardControllerClass = require('./board_controller');
 const Observer = require('./../../core/observer');
 const DatabaseConnection = require('./../helper/database');
 const BoardHelper = require('./../helper/board_helper');
+const EventEnums = require('./../../enums/events');
+const GameManager = require('./../socket_manager/game_manager');
 
 //private variables declaration
 const boardController = Symbol();
@@ -30,6 +32,38 @@ class MainController extends Observer{
     /*
     --------------------------GAME BOARD METHODS---------------------------------------
      */
+    /**
+     * Method responsible registering temporary game and player data. Whenever player logs into game, game data is logged into games map. Each map key is equal to game id, and value
+     * is object, which keys are equal to user names and values are equal to those users sockets Id.
+     * @param {string}  gameId
+     * @param {Object}  playerData
+     * @param {string}  playerData.user
+     * @param {string}  playerData.socketId
+     * @param {string}  playerData.colour
+     */
+    registerTemporaryPlayerInGameData(gameId, playerData){
+
+        GameManager.addUserToGame(gameId, playerData);
+    }
+    /**
+     * Method responsible for removing user from temporary game and player data.
+     * @param {string}  socketId    Unique socket id of client who left page.
+     */
+    removeUserFromTemporaryPlayerInGameData(socketId){
+
+        const disconnectedUserData = GameManager.removeUserFromGame(socketId);
+
+        this.notify(EventEnums.CLIENT_DISCONNECTED, disconnectedUserData);
+    }
+    /**
+     * Method responsible for getting users currently logged in certain game.
+     * @param {string}  gameId
+     * @returns {Object}    Returns object containing information about players logged in game (key - socket id, value - user name)
+     */
+    getUserLoggedInGame(gameId){
+
+        return GameManager.getUsersLoggedInGame(gameId);
+    }
     /**
      * Method responsible for returning promise with game data.
      * @param {string}  gameId  Unique game id from database.
@@ -142,6 +176,14 @@ class MainController extends Observer{
     getDatabaseConnection(){
 
         return this[databaseConnection];
+    }
+    /**
+     * Returns temporary games data map.
+     * @returns {Object}
+     */
+    getTemporaryGamesData(){
+
+        return this[temporaryGamesData];
     }
 }
 
