@@ -4,7 +4,7 @@
 let DatabaseEnums = {
 
     USERS: 'users',
-    GAMES: 'games'
+    GAMES: 'games',
 };
 
 module.exports = DatabaseEnums;

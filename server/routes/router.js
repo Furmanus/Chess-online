@@ -55,6 +55,8 @@ class Router{
         this.getRouterObject().get('/games', this.getUserGames.bind(this));
         this.getRouterObject().get('/games_to_join', this.getGamesToJoin.bind(this));
         this.getRouterObject().post('/join_game', this.joinGame.bind(this));
+        this.getRouterObject().post('/save_message', this.onReceiveMessageToStore.bind(this));
+        this.getRouterObject().get('/game_messages', this.onFetchGameMessages.bind(this));
     }
     /**
      * Callback function for '/' GET route. Checks if user is already logged in and if he is, redirects him to dashboard. Renders login page otherwise.
@@ -99,6 +101,41 @@ class Router{
         }.bind(this)).catch(function(error){
 
             console.log(error);
+        });
+    }
+    /**
+     * Callback method for '/game_messages' GET request. Responsible for fetching game messages from database and sending it back to client.
+     * @param req
+     * @param res
+     */
+    onFetchGameMessages(req, res){
+
+        const gameId = req.query.gameId;
+
+        this.getMainController().getMessagesFromDatabase(gameId).then(function(data){
+            console.log(data.messages);
+            res.send({messages: data.messages});
+        }).catch(function(error){
+
+            console.log(error);
+        })
+    }
+    /**
+     * Callback method for '/save_message' POST request. Responsible for storing messages from game page panel in database.
+     * @param req
+     * @param res
+     */
+    onReceiveMessageToStore(req, res){
+
+        const gameId = req.body.gameId;
+        const message = req.body.message;
+
+        this.getMainController().storeMessageInDatabase(gameId, message).then(function(){
+
+            res.send({result: 'success'});
+        }).catch(function(error){
+
+            res.send({result: 'failure', message: 'Failed to store message'});
         });
     }
     /**
@@ -147,6 +184,7 @@ class Router{
         const usersLoggedInGame = this.getMainController().getUserLoggedInGame(gameId);
         let colour;
         let opponentColour;
+        let messages;
 
         this.getMainController().getGameDataByIdPromise(gameId).then(function(data){
 
@@ -175,6 +213,7 @@ class Router{
                 opponentColour,
                 activePlayer: data.activePlayer,
                 boardData: data.boardData,
+                messages: data.messages,
                 users: usersLoggedInGame
             });
         }).catch(function(error){

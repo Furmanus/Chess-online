@@ -30,9 +30,12 @@ class PanelView extends Observer{
     addMessage(message){
 
         const messageElement = document.createElement('li');
+        const listElement = this.getListElement();
+        const panelElement = this.getPanelElement();
 
         messageElement.textContent = message;
-        this.getListElement().appendChild(messageElement);
+        listElement.appendChild(messageElement);
+        panelElement.scrollTop = listElement.scrollHeight;
     }
     /**
      * Returns HTML panel DIV element.

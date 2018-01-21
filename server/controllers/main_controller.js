@@ -89,6 +89,23 @@ class MainController extends Observer{
 
         return this.getBoardController().moveFigure(data);
     }
+    /**
+     * Method responsible for storing message from game page in database.
+     * @param {string}  gameId
+     * @param {string}  message
+     */
+    storeMessageInDatabase(gameId, message){
+
+        return this.getDatabaseConnection().addMessageToGame(gameId, message);
+    }
+    /**
+     * Method responsible for getting messages for certain game from database.
+     * @param {string}  gameId
+     */
+    getMessagesFromDatabase(gameId){
+
+        return this.getDatabaseConnection().getGameDataById(gameId);
+    }
 
     /*
      -------------------------LOGIN, DASHBOARD PAGES METHODS----------------------------
