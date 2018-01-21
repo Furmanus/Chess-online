@@ -101,7 +101,8 @@ class DatabaseConnection{
             black: null,
             boardData: serializedBoardModel,
             activePlayer: 'white',
-            hasEnded: false
+            hasEnded: false,
+            messages: []
         }
 
         return this.makeDatabaseConnection().then(function(db){
@@ -150,9 +151,10 @@ class DatabaseConnection{
      * @param {Object|null}     serializedBoardModel    Object with new game board data. Optional parameter.
      * @param {string|null}     blackPlayer             Name of second (black) player. Optional parameter.
      * @param {boolean|null}    hasEnded                Boolean variable indicating whether game has ended or not.
+     * @param {Array|null}      messages                Array of messages.
      * @returns {Promise}                               Returns promise. Resolved promise contains data about connection to database.
      */
-    updateGameData(gameId, activePlayer, serializedBoardModel, blackPlayer, hasEnded){
+    updateGameData(gameId, activePlayer, serializedBoardModel, blackPlayer, hasEnded, messages){
 
         const databaseObject = this;
         const ObjectID = mongo.ObjectID;
@@ -165,7 +167,8 @@ class DatabaseConnection{
                 black: blackPlayer ? blackPlayer : currentGameData.black,
                 boardData: serializedBoardModel ? serializedBoardModel : currentGameData.boardData,
                 activePlayer: activePlayer ? activePlayer : currentGameData.activePlayer,
-                hasEnded: hasEnded ? hasEnded : currentGameData.hasEnded
+                hasEnded: hasEnded ? hasEnded : currentGameData.hasEnded,
+                messages: messages ? messages : currentGameData.messages
             }
 
             return databaseObject.makeDatabaseConnection().then(function(db){
@@ -230,6 +233,21 @@ class DatabaseConnection{
     endGame(gameId){
 
         return this.updateGameData(gameId, null, null, null, true);
+    }
+    addMessageToGame(gameId, message){
+
+        let messages;
+
+        return this.getGameDataById(gameId).then(function(data){
+
+            messages = data.messages;
+            messages.push(message);
+
+            return this.updateGameData(gameId, null, null, null, null, messages);
+        }.bind(this)).catch(function(error){
+
+            console.log(error);
+        });
     }
     /**
      * Helper method responsible for making connection to database.

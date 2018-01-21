@@ -102,6 +102,7 @@ class MainController extends Observer{
 
             const playerColour = data.colour;
             const opponentColour = data.opponentColour;
+            const storedMessages = data.messages;
             let wasOpponentLoginStateSet = false;
 
             Ajax.validateAjaxResponseRedirect(data);
@@ -111,7 +112,10 @@ class MainController extends Observer{
             this.getGameModel().setActivePlayer(data.activePlayer);
             this.getBoardController().buildBoardModel(data.boardData);
             this.getBoardController().setBoardStateInView(data.boardData);
-            this.getPanelController().addMessageInView(`Welcome! You are playing ${data.colour} pieces.`);
+            storedMessages.forEach(function(message){
+
+                this.getPanelController().addMessageInView(message)
+            }.bind(this));
             this.getSocketClientManager().sendToServerPlayerOnline({
 
                 user,
@@ -119,6 +123,7 @@ class MainController extends Observer{
                 colour: playerColour
             });
 
+            this.getPanelController().addMessageInView(`Welcome! You are playing ${data.colour} pieces.`);
             if(playerColour === data.activePlayer){
 
                 this.getPanelController().addMessageInView('It is your move now.');
@@ -175,25 +180,49 @@ class MainController extends Observer{
      */
     onPlayerMoveReady(data){
 
+        const gameId = this.getGameModel().getGameId();
         const fromString = `${data.sourceX + 1}x${data.sourceY + 1}`;
         const targetString = `${data.targetX + 1}x${data.targetY + 1}`;
         const previousPlayer = data.activePlayer === ColourEnums.WHITE ? ColourEnums.BLACK : ColourEnums.WHITE;
-        const moveModelData = this.getBoardController().moveFigure({x: data.sourceX, y: data.sourceY}, {x: data.targetX, y: data.targetY});
+        let isActivePlayer;
+        let message;
+        let captureMessage;
+        const moveModelData = this.getBoardController().moveFigure({
 
-        this.getPanelController().addMessageInView(`${previousPlayer} player moved ${moveModelData.figure} from ${fromString} to ${targetString}.`);
+            x: data.sourceX,
+            y: data.sourceY
+        }, {
+            x: data.targetX,
+            y: data.targetY
+        });
+
+        message = `${previousPlayer} player moved ${moveModelData.figure} from ${fromString} to ${targetString}.`;
+
         this.getGameModel().setActivePlayer(data.activePlayer);
 
-        if(data.activePlayer === this.getGameModel().getPlayerColour()){
+        isActivePlayer = data.activePlayer === this.getGameModel().getPlayerColour();
 
+        if(isActivePlayer){
+
+            this.getPanelController().addSavedMessageInView(gameId, message);
             this.getBoardController().listenToViewEvents();
         }else{
 
+            this.getPanelController().addMessageInView(message);
             this.getBoardController().detachEventsInView();
         }
 
         if(moveModelData.capturedFigure){
-            
-            this.getPanelController().addMessageInView(`${previousPlayer} player captured ${data.activePlayer} player's ${moveModelData.capturedFigure}!`);
+
+            captureMessage = `${previousPlayer} player captured ${data.activePlayer} player's ${moveModelData.capturedFigure}!`;
+
+            if(isActivePlayer) {
+
+                this.getPanelController().addSavedMessageInView(gameId, captureMessage);
+            }else{
+
+                this.getPanelController().addMessageInView(captureMessage);
+            }
         }
     }
     /**
