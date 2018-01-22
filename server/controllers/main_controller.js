@@ -7,7 +7,7 @@ const Observer = require('./../../core/observer');
 const DatabaseConnection = require('./../helper/database');
 const BoardHelper = require('./../helper/board_helper');
 const EventEnums = require('./../../enums/events');
-const GameManager = require('./../socket_manager/game_manager');
+const GameManager = require('../managers/game_manager');
 
 //private variables declaration
 const boardController = Symbol();

@@ -4,9 +4,9 @@
 
 const EventEnums = require('./../../enums/events');
 const eventEmmiter = require('./../helper/event_emmiter');
+const gameManager = require('./game_manager');
 
 const socketIo = Symbol();
-const clients = Symbol();
 const mainController = Symbol();
 
 /**
@@ -75,7 +75,7 @@ class SocketManager{
                 targetY: data.targetY
             });
 
-            this.emitEventToAll(EventEnums.PLAYER_MOVED, updatedData);
+            this.emitEventToClientsInGame(data.gameId, EventEnums.PLAYER_MOVED, updatedData);
         }.bind(this)).catch(function(error){
 
             console.log(error);
@@ -93,7 +93,7 @@ class SocketManager{
             socketId: data.socketId,
             colour: data.colour
         });
-        this.emitEventToAll(EventEnums.SERVER_PLAYER_LOGIN, data);
+        this.emitEventToClientsInGame(data.gameId, EventEnums.SERVER_PLAYER_LOGIN, data);
     }
     /**
      * Callback method called after main controller notifies socket manager that user was removed from temporary game data.
@@ -172,6 +172,26 @@ class SocketManager{
     emitEventToAll(eventType, data = {}){
 
         this.getSocketIo().sockets.emit(eventType, data);
+    }
+    /**
+     * Method responsible for emiting event to clients logged to game of specified game id.
+     * @param {string}  gameId
+     * @param {string}  eventType
+     * @param {Object}  data
+     */
+    emitEventToClientsInGame(gameId, eventType, data = {}){
+
+        const usersInGame = gameManager.getUsersLoggedInGame(gameId);
+
+        for(let userId in usersInGame){
+
+            if(!usersInGame.hasOwnProperty(userId)){
+
+                continue;
+            }
+
+            this.emitEventToSpecifiedClient(userId, eventType, data);
+        }
     }
 }
 

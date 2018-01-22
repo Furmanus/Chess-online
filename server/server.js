@@ -1,7 +1,7 @@
 /**
  * @author Lukasz Lach
  */
-const SocketManager = require('./socket_manager/socket_manager');
+const SocketManager = require('./managers/socket_manager');
 const Router = require('./routes/router');
 const eventEmmiter = require('./helper/event_emmiter');
 const MongoDb = require('./helper/database');
