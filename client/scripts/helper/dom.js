@@ -7,6 +7,15 @@ import Growler from './growler';
 
 class DomHelper{
     /**
+     * Method responsible for capitalizing first text letter.
+     * @param   {string}      text
+     * @returns {string}    Modified string.
+     */
+    static capitalizeString(text){
+
+        return text[0].toUpperCase() + text.substring(1);
+    }
+    /**
      * Clears HTML DOM element from its childrens
      * @param {HTMLElement} element
      */

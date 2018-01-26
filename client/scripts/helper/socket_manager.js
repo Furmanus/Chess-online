@@ -104,6 +104,10 @@ class SocketClientManager extends Observer{
 
         this.emitEvent(EventEnums.SEND_PLAYER_LOGIN, data);
     }
+    sendToServerGameOver(data){
+
+        this.emitEvent(EventEnums.SEND_TO_SERVER_GAME_OVER, data);
+    }
     emitEvent(eventName, data){
 
         this.getSocket().emit(eventName, data);

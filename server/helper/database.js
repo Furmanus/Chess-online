@@ -156,7 +156,6 @@ class DatabaseConnection{
      */
     updateGameData(gameId, activePlayer, serializedBoardModel, blackPlayer, hasEnded, messages){
 
-        const databaseObject = this;
         const ObjectID = mongo.ObjectID;
 
         return this.getGameDataById(gameId).then(function(currentGameData){
@@ -171,20 +170,20 @@ class DatabaseConnection{
                 messages: messages ? messages : currentGameData.messages
             }
 
-            return databaseObject.makeDatabaseConnection().then(function(db){
+            return this.makeDatabaseConnection().then(function(db){
 
                 return db.collection(databaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData).then(function(updatedDb){
 
-                    return databaseObject.getGameDataById(gameId);
-                }).catch(function(error){
+                    return this.getGameDataById(gameId);
+                }.bind(this)).catch(function(error){
 
                     console.log(error);
                 });
-            }).catch(function(error){
+            }.bind(this)).catch(function(error){
 
                 console.log(error);
             });
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });

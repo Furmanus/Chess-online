@@ -3,6 +3,7 @@
 import BoardController from "./board_controller";
 import PanelController from "./panel_controller";
 import ColourEnums from "../../../enums/colours";
+import FigureEnums from "../../../enums/figures";
 import EventEnums from "./../../../enums/events";
 import View from "../view/view";
 import SocketClientManager from "../helper/socket_manager";
@@ -123,6 +124,12 @@ class MainController extends Observer{
                 colour: playerColour
             });
 
+            if(data.hasEnded){
+
+                this.getPanelController().addMessageInView(`Game is over.`);
+                return;
+            }
+
             this.getPanelController().addMessageInView(`Welcome! You are playing ${data.colour} pieces.`);
             if(playerColour === data.activePlayer){
 
@@ -212,7 +219,12 @@ class MainController extends Observer{
             this.getBoardController().detachEventsInView();
         }
 
-        if(moveModelData.capturedFigure){
+        if(moveModelData.capturedFigure === FigureEnums.KING){
+
+            this.getPanelController().addMessageInView(`${previousPlayer} player captured ${data.activePlayer} player's king! ${previousPlayer} player is victorious! Game is over`);
+            this.getBoardController().detachEventsInView();
+            this.getSocketClientManager().sendToServerGameOver({gameId});
+        }else if(moveModelData.capturedFigure){
 
             captureMessage = `${previousPlayer} player captured ${data.activePlayer} player's ${moveModelData.capturedFigure}!`;
 
