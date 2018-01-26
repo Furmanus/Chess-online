@@ -214,6 +214,7 @@ class Router{
                 activePlayer: data.activePlayer,
                 boardData: data.boardData,
                 messages: data.messages,
+                hasEnded: data.hasEnded,
                 users: usersLoggedInGame
             });
         }).catch(function(error){
@@ -455,7 +456,6 @@ class Router{
     getUserGames(req, res){
 
         const user = req.query.user;
-        const routerObject = this;
         let gamesList;
         let comparisionResult;
         let filteredList;
@@ -464,10 +464,10 @@ class Router{
 
             gamesList = data[0].games;
 
-            routerObject.getMainController().getAllGamesData().then(function(gamesListData){
+            this.getMainController().getAllGamesData().then(function(gamesListData){
 
                 gamesListData.forEach(function(item){
-
+                    //we delete info about board data, as it is not needed to send to user
                     delete item.boardData;
                 });
 
@@ -477,7 +477,7 @@ class Router{
 
                     for(let playerGameData of gamesList){
 
-                        if(playerGameData.toString() === item._id.toString()){
+                        if((playerGameData.toString() === item._id.toString()) && !item.hasEnded){
 
                             comparisionResult = true;
                             break;
@@ -488,11 +488,11 @@ class Router{
                 });
 
                 res.send(filteredList);
-            }).catch(function(error){
+            }.bind(this)).catch(function(error){
 
                 console.log(error);
             });
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });

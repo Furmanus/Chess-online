@@ -25,6 +25,7 @@ let EventEnums = {
     //CLIENT TO SERVER EVENTS
     SEND_PLAYER_MOVE: 'player:move:send',
     SEND_PLAYER_LOGIN: 'player:login:send',
+    SEND_TO_SERVER_GAME_OVER: 'client:game:over'
 };
 
 module.exports = EventEnums;

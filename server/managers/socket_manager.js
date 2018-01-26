@@ -96,6 +96,15 @@ class SocketManager{
         this.emitEventToClientsInGame(data.gameId, EventEnums.SERVER_PLAYER_LOGIN, data);
     }
     /**
+     * Method responsible for registering in database that certain game has ended.
+     * @param {Object]  data
+     * @param {string}  data.gameId
+     */
+    onGameOver(data){
+
+        this.getMainController().endGame(data.gameId);
+    }
+    /**
      * Callback method called after main controller notifies socket manager that user was removed from temporary game data.
      * @param {Object}  data
      * @param {string}  data.user
@@ -122,6 +131,7 @@ class SocketManager{
         }.bind(this));
         socket.on(EventEnums.SEND_PLAYER_MOVE, this.playerMoveEventListener.bind(this));
         socket.on(EventEnums.SEND_PLAYER_LOGIN, this.onPlayerGameBoardLogin.bind(this));
+        socket.on(EventEnums.SEND_TO_SERVER_GAME_OVER, this.onGameOver.bind(this));
     }
     /**
      * Method responsible for making socket listen to certain event.

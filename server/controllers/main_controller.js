@@ -106,6 +106,15 @@ class MainController extends Observer{
 
         return this.getDatabaseConnection().getGameDataById(gameId);
     }
+    /**
+     * Method responsible for changing status of certain game in database to ended"
+     * @param gameId
+     * @returns {Promise}
+     */
+    endGame(gameId){
+
+        return this.getDatabaseConnection().endGame(gameId);
+    }
 
     /*
      -------------------------LOGIN, DASHBOARD PAGES METHODS----------------------------

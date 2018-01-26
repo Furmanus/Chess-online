@@ -70,7 +70,8 @@ class BoardController extends Observer{
         this.getBoardView().off(this, EventEnums.BOARD_CLICK);
     }
     /**
-     *  //TODO uzupełnic.
+     * Method triggered after clicking board cell in view.
+     *
      * @param   {Object}    data    Object containing coordinates of chosen cell.
      * @param   {number}    data.x  Row(horizontal) coordinate of chosen cell.
      * @param   {number}    data.y  Column(vertical) coordinate of chosen cell.
