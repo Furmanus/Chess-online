@@ -15,6 +15,7 @@ const io = require('socket.io');
 const MainController = require('./controllers/main_controller');
 const EventEnums = require('./../enums/events');
 const SessionManager = require('./helper/session_manager');
+const config = require('./helper/config');
 
 //declaration of private variables
 const server = Symbol();
@@ -80,7 +81,7 @@ class Server{
         this[router] = new Router(this.getMainController(), this.getSessionManager())
         this.getApp().use(bodyParser.urlencoded({extended: true}));
         this.getApp().use(bodyParser.json());
-        this.getApp().use(cookieParser('sfsergxxz@#$%r2'));
+        this.getApp().use(cookieParser(config.cookieParserSecret));
         this.getApp().use(this.getSessionManager().getSession());
         this.getApp().use(express.static(path.join(__dirname, '../client')));
         this.getApp().use(this.getRouter().getRouterObject());
