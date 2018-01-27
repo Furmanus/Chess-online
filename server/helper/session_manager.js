@@ -3,6 +3,7 @@
  */
 
 const session = require('express-session');
+const config = require('./config');
 
 const options = Symbol();
 const sessionObject = Symbol();
@@ -19,13 +20,13 @@ class SessionManager{
 
         /**@type {Object}*/
         this[options] = {
-            secret: 'sfsergxxz@#$%r2',
+            secret: config.sessionSecret,
             resave: true,
             saveUninitialized: true,
-            path: '/',
+            path: config.sessionPath,
             cookie: {
-                maxAge: 1000000,
-                secure: false
+                maxAge: config.sessionMaxAge,
+                secure: config.sessionIsSecure
             }
         };
         /**@type {Object}*/

@@ -5,9 +5,9 @@
 const mongo = require('mongodb');
 const MongoClient = mongo.MongoClient;
 const databaseEnums = require('./../../enums/database_enums');
+const config = require('./config');
 const colourEnums = require('./../../enums/colours');
 const boardHelper = require('./../helper/board_helper');
-const databaseUrl = 'mongodb://chessadmin:chessadmin@ds129906.mlab.com:29906/chess';
 
 const database = Symbol();
 
@@ -254,7 +254,7 @@ class DatabaseConnection{
      */
     makeDatabaseConnection(){
 
-        return MongoClient.connect(databaseUrl);
+        return MongoClient.connect(config.databaseUrl);
     }
 }
 

@@ -3,4 +3,5 @@ node_modules
 client/scripts/game.bundle.js
 client/scripts/login.bundle.js
 client/scripts/dashboard.bundle.js
+server/helper/config.js
 npm-debug.log
