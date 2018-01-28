@@ -1,5 +1,4 @@
 import MainController from "./controller/controller";
-import Observer from "../../core/observer";
 
 (function(){
 
@@ -14,8 +13,5 @@ import Observer from "../../core/observer";
         gameInitialData[examinedElement[0]] = examinedElement[1];
     });
 
-    window.front = {
-
-        controller: new MainController(gameInitialData)
-    };
+    new MainController(gameInitialData)
 })();
