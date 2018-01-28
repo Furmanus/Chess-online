@@ -6,8 +6,6 @@ const express = require('express');
 const EventEnums = require('./../../enums/events');
 const ColourEnums = require('./../../enums/colours');
 
-const eventEmmiter = require('./../helper/event_emmiter');
-const path = require('path');
 const bcrypt = require('bcrypt');
 
 const mainController = Symbol();
@@ -50,7 +48,6 @@ class Router{
         this.getRouterObject().all('*', this.isUserLoggedIn.bind(this));
         this.getRouterObject().get('/dashboard', this.dashboardPage.bind(this));
         this.getRouterObject().post('/create_game', this.createGame.bind(this));
-        this.getRouterObject().get('/board_state', this.getBoardState.bind(this));
         this.getRouterObject().post('/figure_moves', this.boardClickRequestHandler.bind(this));
         this.getRouterObject().post('/initial_player_data', this.getInitialPlayerData.bind(this));
         this.getRouterObject().get('/games', this.getUserGames.bind(this));
@@ -86,23 +83,22 @@ class Router{
     createGame(req, res){
 
         const user = req.body.user;
+        let firstPromiseResult;
         let createdGameId;
 
         this.getMainController().createNewGame(user).then(function(data){
 
+            firstPromiseResult = data;
             createdGameId = data.ops[0]._id;
 
-            this.getMainController().addGameToUser(user, createdGameId).then(function(){
+            return this.getMainController().addGameToUser(user, createdGameId);
+        }.bind(this)).then(function(){
 
-                res.send(data.ops[0]);
-            }).catch(function(error){
-
-                console.log(error);
-            });
-        }.bind(this)).catch(function(error){
+            res.send(firstPromiseResult.ops[0]);
+        }).catch(function(error){
 
             console.log(error);
-        });
+        });;
     }
     /**
      * Callback method for '/game_messages' GET request. Responsible for fetching game messages from database and sending it back to client.
@@ -114,7 +110,7 @@ class Router{
         const gameId = req.query.gameId;
 
         this.getMainController().getMessagesFromDatabase(gameId).then(function(data){
-            console.log(data.messages);
+
             res.send({messages: data.messages});
         }).catch(function(error){
 
@@ -218,23 +214,6 @@ class Router{
                 hasEnded: data.hasEnded,
                 users: usersLoggedInGame
             });
-        }).catch(function(error){
-
-            console.log(error);
-        });
-    }
-    /**
-     * Callback function for '/board_state' GET route. Takes board states from main controller and sends it in response.
-     * @param {Object} req
-     * @param {Object} res
-     */
-    getBoardState(req, res){
-
-        const gameId = req.query.gameId;
-
-        this.getMainController().getGameDataByIdPromise(gameId).then(function(data){
-
-            console.log(data);
         }).catch(function(error){
 
             console.log(error);
@@ -480,38 +459,35 @@ class Router{
 
             gamesList = data[0].games;
 
-            this.getMainController().getAllGamesData().then(function(gamesListData){
+            return this.getMainController().getAllGamesData();
+        }.bind(this)).then(function(gamesListData){
 
-                gamesListData.forEach(function(item){
-                    //we delete info about board data, as it is not needed to send to user
-                    delete item.boardData;
-                });
-
-                filteredList = gamesListData.filter(function(item){
-
-                    comparisionResult = false;
-
-                    for(let playerGameData of gamesList){
-
-                        if((playerGameData.toString() === item._id.toString()) && !item.hasEnded){
-
-                            comparisionResult = true;
-                            break;
-                        }
-                    }
-
-                    return comparisionResult;
-                });
-
-                res.send(filteredList);
-            }.bind(this)).catch(function(error){
-
-                console.log(error);
+            gamesListData.forEach(function(item){
+                //we delete info about board data, as it is not needed to send to user
+                delete item.boardData;
             });
+
+            filteredList = gamesListData.filter(function(item){
+
+                comparisionResult = false;
+
+                for(let playerGameData of gamesList){
+
+                    if((playerGameData.toString() === item._id.toString()) && !item.hasEnded){
+
+                        comparisionResult = true;
+                        break;
+                    }
+                }
+
+                return comparisionResult;
+            });
+
+            res.send(filteredList);
         }.bind(this)).catch(function(error){
 
             console.log(error);
-        });
+        });;
     }
     /**
      * Callback function for '/games_to_join' GET route. Responsible for obtaining from database games to which user can join.

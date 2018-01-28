@@ -113,29 +113,23 @@ class DashboardPage extends Page{
                 this.showServerMessage('You have no ongoing games.')
             }
 
-            Ajax.get('/games_to_join', {user}, true).then(function(data){
+            return Ajax.get('/games_to_join', {user}, true);
+        }.bind(this)).then(function(data){
 
-                if(data.length){
+            if(data.length){
 
-                    data.forEach(function(item){
+                data.forEach(function(item){
 
-                        this.addItemToSliderMenu(item);
-                    }.bind(this));
-                }else{
+                    this.addItemToSliderMenu(item);
+                }.bind(this));
+            }else{
 
-                    this.addItemToSliderMenu();
-                }
+                this.addItemToSliderMenu();
+            }
 
-                this.hideLoader();
-                this.validateGamesQuantity();
-            }.bind(this)).catch(function(error){
-
-                console.log(error);
-            });
-        }.bind(this)).catch(function(error){
-
-            console.log(error);
-        });
+            this.hideLoader();
+            this.validateGamesQuantity();
+        }.bind(this));
     }
     /**
      * Method responsible for logging user out.
