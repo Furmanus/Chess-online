@@ -8,6 +8,7 @@ const databaseEnums = require('./../../enums/database_enums');
 const config = require('./config');
 const colourEnums = require('./../../enums/colours');
 const boardHelper = require('./../helper/board_helper');
+const bcrypt = require('bcrypt');
 
 const database = Symbol();
 
@@ -31,17 +32,25 @@ class DatabaseConnection{
 
         const databaseDocument = {
             user,
-            password,
             games: []
         };
 
-        return this.makeDatabaseConnection().then(function(db){
+        return bcrypt.hash(password, config.salt).then(function(encryptedData){
 
-            return db.collection(databaseEnums.USERS).insertOne(databaseDocument);
-        }).catch(function(error){
+            databaseDocument.password = encryptedData;
 
-            console.error(error);
-        })
+            return this.makeDatabaseConnection().then(function(db){
+
+                return db.collection(databaseEnums.USERS).insertOne(databaseDocument);
+            }.bind(this)).catch(function(error){
+
+                console.error(error);
+            })
+        }.bind(this)).catch(function(error){
+
+            console.log(error);
+        });
+
     }
     /**
      * Method responsible for obtaining user data from database.

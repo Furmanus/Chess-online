@@ -8,6 +8,7 @@ const ColourEnums = require('./../../enums/colours');
 
 const eventEmmiter = require('./../helper/event_emmiter');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const mainController = Symbol();
 const socketManager = Symbol();
@@ -422,25 +423,40 @@ class Router{
 
             let requestResult = {};
 
-            if(!data.length || data[0].password !== req.body.password){
+            if(!data.length){
 
                 requestResult.loginSuccessful = false;
                 requestResult.errorMessage = 'Invalid login or password.';
-            }else{
 
-                if(this.getSessionManager().getLoggedUsersMap().get(req.body.login)){
+                res.send(requestResult);
+            }else {
 
-                    requestResult.loginSuccessful = false;
-                    requestResult.errorMessage = 'User already logged in.'
-                }else {
+                bcrypt.compare(req.body.password, data[0].password).then(function (match) {
 
-                    this.getSessionManager().getLoggedUsersMap().set(req.body.login, req.sessionID);
-                    req.session.user = req.body.login;
-                    requestResult.loginSuccessful = true;
-                }
+                    if(match) {
+
+                        if (this.getSessionManager().getLoggedUsersMap().get(req.body.login)) {
+
+                            requestResult.loginSuccessful = false;
+                            requestResult.errorMessage = 'User already logged in.'
+                        } else {
+
+                            this.getSessionManager().getLoggedUsersMap().set(req.body.login, req.sessionID);
+                            req.session.user = req.body.login;
+                            requestResult.loginSuccessful = true;
+                        }
+                    }else{
+
+                        requestResult.loginSuccessful = false;
+                        requestResult.errorMessage = 'Invalid login or password.';
+                    }
+
+                    res.send(requestResult);
+                }.bind(this)).catch(function (err) {
+
+                    console.log(error);
+                });
             }
-
-            res.send(requestResult);
         }.bind(this)).catch(function(error){
 
             console.log(error);
