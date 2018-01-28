@@ -10,18 +10,11 @@ const colourEnums = require('./../../enums/colours');
 const boardHelper = require('./../helper/board_helper');
 const bcrypt = require('bcrypt');
 
-const database = Symbol();
-
 /**
  * @class
  * @typedef {Object} DatabaseConnection
  */
 class DatabaseConnection{
-
-    constructor(){
-
-        //this.insertNewUser('ania', '46');
-    }
     /**
      * Method responsible for inserting new user data into database.
      * @param {string}  user
@@ -39,13 +32,10 @@ class DatabaseConnection{
 
             databaseDocument.password = encryptedData;
 
-            return this.makeDatabaseConnection().then(function(db){
+            return this.makeDatabaseConnection();
+        }.bind(this)).then(function(db){
 
-                return db.collection(databaseEnums.USERS).insertOne(databaseDocument);
-            }.bind(this)).catch(function(error){
-
-                console.error(error);
-            })
+            return db.collection(databaseEnums.USERS).insertOne(databaseDocument);
         }.bind(this)).catch(function(error){
 
             console.log(error);
@@ -84,17 +74,14 @@ class DatabaseConnection{
             userData.password = data[0].password;
             userData.games = data[0].games;
 
-            return databaseConnectionObject.makeDatabaseConnection().then(function(db){
+            return databaseConnectionObject.makeDatabaseConnection();
+        }).then(function(db){
 
-                return db.collection(databaseEnums.USERS).updateOne({user}, userData);
-            }).catch(function(error){
-
-                console.log(error);
-            })
+            return db.collection(databaseEnums.USERS).updateOne({user}, userData);
         }).catch(function(error){
 
             console.log(error);
-        })
+        });
     }
     /**
      * Method responsible for inserting into database new game document.
@@ -129,7 +116,7 @@ class DatabaseConnection{
      */
     getGameDataById(gameId){
 
-        const ObjectID = mongo.ObjectID
+        const ObjectID = mongo.ObjectID;
 
         return this.makeDatabaseConnection().then(function(db){
 
@@ -166,10 +153,11 @@ class DatabaseConnection{
     updateGameData(gameId, activePlayer, serializedBoardModel, blackPlayer, hasEnded, messages){
 
         const ObjectID = mongo.ObjectID;
+        let newGameData;
 
         return this.getGameDataById(gameId).then(function(currentGameData){
 
-            const newGameData = {
+            newGameData = {
 
                 white: currentGameData.white,
                 black: blackPlayer ? blackPlayer : currentGameData.black,
@@ -179,23 +167,17 @@ class DatabaseConnection{
                 messages: messages ? messages : currentGameData.messages
             }
 
-            return this.makeDatabaseConnection().then(function(db){
+            return this.makeDatabaseConnection();
+        }.bind(this)).then(function(db){
 
-                return db.collection(databaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData).then(function(updatedDb){
+            return db.collection(databaseEnums.GAMES).updateOne({_id: new ObjectID(gameId)}, newGameData)
+        }.bind(this)).then(function(){
 
-                    return this.getGameDataById(gameId);
-                }.bind(this)).catch(function(error){
-
-                    console.log(error);
-                });
-            }.bind(this)).catch(function(error){
-
-                console.log(error);
-            });
+            return this.getGameDataById(gameId);
         }.bind(this)).catch(function(error){
 
             console.log(error);
-        });
+        });;
     }
     changeActivePlayerInGame(gameId, activePlayer){
 
