@@ -15,6 +15,7 @@ const serverMessagesElement = Symbol();
 const logoutInputElement = Symbol();
 const createInputElement = Symbol();
 const sliderMenuElement = Symbol();
+const warningParagraphElement = Symbol();
 
 /**
  * @class
@@ -43,6 +44,8 @@ class DashboardPage extends Page{
         this[createInputElement] = document.getElementById('create');
         /**@type {HTMLElement}*/
         this[sliderMenuElement] = document.querySelector('.slider-menu-list');
+        /**@type {HTMLParagraphElement*/
+        this[warningParagraphElement] = document.querySelector('.warning');
 
         this.sliderMenuOnMouseLeave = this.sliderMenuOnMouseLeave.bind(this);
         this.sliderMenuOnMouseOver = this.sliderMenuOnMouseOver.bind(this);
@@ -92,7 +95,6 @@ class DashboardPage extends Page{
     getGamesFromServer(){
 
         const user = this.getUser();
-        const dashBoardPageObject = this;
 
         this.showLoader();
 
@@ -104,13 +106,11 @@ class DashboardPage extends Page{
 
                 data.forEach(function (element) {
 
-                    dashBoardPageObject.addItemToGamesList(element, user);
-                });
-
-                dashBoardPageObject.validateGamesQuantity();
+                    this.addItemToGamesList(element, user);
+                }.bind(this));
             }else{
 
-                dashBoardPageObject.showServerMessage('You have no ongoing games.')
+                this.showServerMessage('You have no ongoing games.')
             }
 
             Ajax.get('/games_to_join', {user}, true).then(function(data){
@@ -119,19 +119,20 @@ class DashboardPage extends Page{
 
                     data.forEach(function(item){
 
-                        dashBoardPageObject.addItemToSliderMenu(item, user);
-                    });
+                        this.addItemToSliderMenu(item);
+                    }.bind(this));
                 }else{
 
-                    dashBoardPageObject.addItemToSliderMenu();
+                    this.addItemToSliderMenu();
                 }
 
-                dashBoardPageObject.hideLoader();
-            }).catch(function(error){
+                this.hideLoader();
+                this.validateGamesQuantity();
+            }.bind(this)).catch(function(error){
 
                 console.log(error);
             });
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
@@ -154,7 +155,6 @@ class DashboardPage extends Page{
     createNewGame(){
 
         const user = this.getUser();
-        const dashboardPageObject = this;
         let newListElement;
 
         this.showLoader();
@@ -162,12 +162,12 @@ class DashboardPage extends Page{
         Ajax.post('/create_game', {user}).then(function(data){
 
             Ajax.validateAjaxResponseRedirect(data);
-            dashboardPageObject.addItemToGamesList(data, user);
-            dashboardPageObject.hideLoader();
-            dashboardPageObject.validateGamesQuantity();
+            this.addItemToGamesList(data, user);
+            this.hideLoader();
+            this.validateGamesQuantity();
 
             DomHelper.showGrowler('Game successfully created');
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
@@ -179,9 +179,9 @@ class DashboardPage extends Page{
 
         const loader = this.getLoaderElement();
 
-        this.addClass(this.getMainElement(), 'transparent');
+        this.addClass(this[mainPageElement], 'disabled');
+        this.addClass(this[sliderMenuElement], 'disabled');
         this.showElement(loader);
-        this.disableButtons();
     }
     /**
      * Method responsible for hiding loader.
@@ -190,9 +190,9 @@ class DashboardPage extends Page{
 
         const loader = this.getLoaderElement();
 
-        this.removeClass(this.getMainElement(), 'transparent');
+        this.removeClass(this[mainPageElement], 'disabled');
+        this.removeClass(this[sliderMenuElement], 'disabled');
         this.hideElement(loader);
-        this.enableButtons();
     }
     /**
      * Displays message from server.
@@ -219,7 +219,8 @@ class DashboardPage extends Page{
         if(list.length > 3){
 
             this.disableElement(this[createInputElement]);
-            this.hideElement(this[sliderMenuElement]);
+            this.disableElement(this[sliderMenuElement]);
+            this[warningParagraphElement].textContent = 'You have exceeded allowed number of active games. Complete your active games.';
         }
     }
     /**
@@ -280,7 +281,6 @@ class DashboardPage extends Page{
     joinGame(gameDataObject, ev){
 
         const user = this.getUser();
-        const dashboardObject = this;
         const linkParentElement = ev.target.parentElement.parentElement.parentElement;
 
         ev.preventDefault();
@@ -291,37 +291,17 @@ class DashboardPage extends Page{
             if(data.result){
 
                 Object.defineProperty(gameDataObject, 'black', {value: user});
-                dashboardObject[sliderMenuElement].removeChild(linkParentElement);
-                dashboardObject.addItemToGamesList(gameDataObject, user);
+                this[sliderMenuElement].removeChild(linkParentElement);
+                this.addItemToGamesList(gameDataObject, user);
             }
 
             DomHelper.showGrowler(data.message);
-            dashboardObject.hideLoader();
-            dashboardObject.validateGamesQuantity();
-        }).catch(function(error){
+            this.hideLoader();
+            this.validateGamesQuantity();
+        }.bind(this)).catch(function(error){
 
             console.log(error);
         });
-    }
-    /**
-     * Method responsible for disabling page elements. Overrides method in page class.
-     */
-    disableButtons(){
-
-        super.disableButtons();
-
-        this[sliderMenuElement].removeEventListener('mouseover', this.sliderMenuOnMouseOver);
-        this[sliderMenuElement].removeEventListener('mouseleave', this.sliderMenuOnMouseLeave);
-    }
-    /**
-     * Method responsible for enabling page elements. Overrides method in page class.
-     */
-    enableButtons(){
-
-        super.enableButtons();
-
-        this[sliderMenuElement].addEventListener('mouseover', this.sliderMenuOnMouseOver.bind(this));
-        this[sliderMenuElement].addEventListener('mouseleave', this.sliderMenuOnMouseLeave.bind(this));
     }
     /**
      * Returns user name.

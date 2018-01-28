@@ -26,7 +26,7 @@ class Page{
      */
     disableElement(element){
 
-        element.setAttribute('disabled', 'disabled');
+        this.addClass(element, 'disabled');
     }
     /**
      * Method responsible for enabling HTML element.
@@ -34,10 +34,7 @@ class Page{
      */
     enableElement(element){
 
-        if(element.hasAttribute('disabled')) {
-
-            element.removeAttribute('disabled');
-        }
+        this.removeClass(element, 'disabled');
     }
     /**
      * Method responsible for disabling buttons on page. Can be overriden in certain pages objects.

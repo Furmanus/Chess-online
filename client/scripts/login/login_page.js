@@ -143,7 +143,7 @@ class LoginPage extends Page{
      * was not successful.
      */
     validateUserLogin(){
-        //TODO poprawic regexpy i walidację
+
         const login = this[userLoginElement].value;
 
         const loginLengthTest = login.length > 3 && login.length < 12;
