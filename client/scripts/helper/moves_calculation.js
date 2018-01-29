@@ -15,7 +15,6 @@ const ColourEnums = require('../../../enums/colours');
 module.exports = function(figure, startingPoint, boardState){
 
     const owner = figure.getColour();
-    const name = figure.getFigureName();
     const moves = figure.getPossibleMoves().moves;
     const resultPossibleMoves = [];
     let currentPoint = null;

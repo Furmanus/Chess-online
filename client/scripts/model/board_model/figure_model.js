@@ -78,7 +78,11 @@ class Figure{
         if(!this[hasMoved]) {
 
             this[hasMoved] = true;
-            this.getPossibleMoves().moves.splice(0, 1);
+
+            if(this.getFigureName() === FigureEnums.PAWN) {
+                
+                this.getPossibleMoves().moves.splice(0, 1);
+            }
         }
     }
     /**
