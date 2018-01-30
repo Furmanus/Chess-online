@@ -110,7 +110,7 @@ class DashboardPage extends Page{
                 }.bind(this));
             }else{
 
-                this.showServerMessage('You have no ongoing games.')
+                this.showMessage('You have no ongoing games.')
             }
 
             return Ajax.get('/games_to_join', {user}, true);
@@ -158,6 +158,7 @@ class DashboardPage extends Page{
             Ajax.validateAjaxResponseRedirect(data);
             this.addItemToGamesList(data, user);
             this.hideLoader();
+            this.clearServerMessage();
             this.validateGamesQuantity();
 
             DomHelper.showGrowler('Game successfully created');
@@ -192,7 +193,7 @@ class DashboardPage extends Page{
      * Displays message from server.
      * @param {string}  message
      */
-    showServerMessage(message){
+    showMessage(message){
 
         this.getServerMessagesElement().textContent = message;
     }
@@ -214,7 +215,7 @@ class DashboardPage extends Page{
 
             this.disableElement(this[createInputElement]);
             this.disableElement(this[sliderMenuElement]);
-            this[warningParagraphElement].textContent = 'You have exceeded allowed number of active games. Complete your active games.';
+            this.showMessage('You have exceeded allowed number of active games. Complete your active games.');
         }
     }
     /**
@@ -291,6 +292,7 @@ class DashboardPage extends Page{
 
             DomHelper.showGrowler(data.message);
             this.hideLoader();
+            this.clearServerMessage();
             this.validateGamesQuantity();
         }.bind(this)).catch(function(error){
 

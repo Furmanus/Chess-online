@@ -71,7 +71,7 @@ class Figure{
         possibleMoves.moves = figureMoves;
     }
     /**
-     * Method responsible for marking figure as moved (after initial movement) and reducing its moving distance to 1 cell.
+     * Method responsible for marking figure as moved (after initial movement) and reducing its moving distance to 1 cell (if figure is a pawn).
      */
     markFigureAsMoved(){
 
