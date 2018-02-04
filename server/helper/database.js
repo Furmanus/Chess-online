@@ -224,14 +224,17 @@ class DatabaseConnection{
 
         return this.updateGameData(gameId, null, null, null, true);
     }
-    addMessageToGame(gameId, message){
+    addMessageToGame(gameId, message, moveData){
 
         let messages;
 
         return this.getGameDataById(gameId).then(function(data){
 
             messages = data.messages;
-            messages.push(message);
+            messages.push({
+                message,
+                moveData
+            });
 
             return this.updateGameData(gameId, null, null, null, null, messages);
         }.bind(this)).catch(function(error){

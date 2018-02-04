@@ -38,6 +38,7 @@ class BoardController extends Observer{
         this[boardModel] = new BoardModel();
 
         this.initialize();
+        this.attachEventListeners();
     }
 
     /**
@@ -52,7 +53,8 @@ class BoardController extends Observer{
      */
     attachEventListeners(){
 
-        this.listenToViewEvents();
+        this.getBoardView().on(this, EventEnums.BOARD_VIEW_REPLAY_START, this.onBoardViewReplayStart.bind(this));
+        this.getBoardView().on(this, EventEnums.BOARD_VIEW_REPLAY_END, this.onBoardViewReplayEnd.bind(this));
     }
     /**
      * Method responsible for listening on board view for particular events.
@@ -182,6 +184,30 @@ class BoardController extends Observer{
     highlightFiguresAbleToMoveInView(figuresCoordinates){
 
         this.getBoardView().highlightFiguresAbleToMove(figuresCoordinates);
+    }
+    /**
+     * Method responsible for replaying certain move.
+     * @param {Object}  moveData
+     */
+    replayMove(moveData){
+
+        const currentBoardState = this.getBoardModel().getDataToSerialization();
+
+        this.getBoardView().replayMove(moveData, currentBoardState);
+    }
+    /**
+     * Method triggered when board view notifies board controller that replay of move just started.
+     */
+    onBoardViewReplayStart(){
+
+        this.notify(EventEnums.BOARD_VIEW_REPLAY_START);
+    }
+    /**
+     * Method triggered when board view notifies board controller that replay of move just ended.
+     */
+    onBoardViewReplayEnd(){
+
+        this.notify(EventEnums.BOARD_VIEW_REPLAY_END);
     }
     /**
      * Returns game model.

@@ -29,6 +29,11 @@
 
     border-bottom: none;
 }
+.panel .messages .hover{
+
+    cursor: pointer;
+    background-color: #E4DAAE;
+ }
 ::-webkit-scrollbar {
     width: 12px;
 }

@@ -13,6 +13,11 @@ let EventEnums = {
     CLIENT_MODEL_MOVE_MADE: 'client:model_move_made',
     SOCKET_TO_CONTROLLER_PLAYER_LOGIN: 'socket:controller:player:login',
     SOCKET_TO_CONTROLLER_PLAYER_DISCONNECT: 'socket:controller:player:disconnect',
+    PANEL_MESSAGE_CREATED: 'panel:message:created',
+    PANEL_MESSAGE_ATTACH_READY: 'panel:message:attach:ready',
+    PANEL_MESSAGE_CLICK: 'panel:message:click',
+    BOARD_VIEW_REPLAY_START: 'board:replay:start',
+    BOARD_VIEW_REPLAY_END: 'board:replay:end',
     //SERVER EVENTS
     SEND_SERVER_GAME_STATUS_READY: 'server:players_ready',
     CLIENT_DISCONNECTED: 'client:disconnected',
