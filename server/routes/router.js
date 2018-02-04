@@ -124,10 +124,13 @@ class Router{
      */
     onReceiveMessageToStore(req, res){
 
-        const gameId = req.body.gameId;
-        const message = req.body.message;
+        const {
+            gameId,
+            message,
+            moveData
+        } = req.body;
 
-        this.getMainController().storeMessageInDatabase(gameId, message).then(function(){
+        this.getMainController().storeMessageInDatabase(gameId, message, moveData).then(function(){
 
             res.send({result: 'success'});
         }).catch(function(error){

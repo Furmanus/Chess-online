@@ -113,7 +113,7 @@ class Figure{
      * Moves figures from currently occupied cell to another cell.
      * @param {Cell} sourceCell Source Cell.
      * @param {Cell} targetCell Destination cell.
-     * @returns {undefined}
+     * @returns {Promise}
      */
     moveTo(sourceCell, targetCell){
 
@@ -139,32 +139,40 @@ class Figure{
         this.getElement().style.left = thisPositionX + 'px';
         this.getElement().style.top = thisPositionY + 'px';
 
-        // Execute bresenham algorithm. Figure html element is moved along path from starting point to target point
-        Utility.bresenham(thisPositionX, thisPositionY, targetPositionX, targetPositionY, 1, function(x, y){
+        return new Promise(function(resolve) {
 
-            this.getElement().style.left = x + 'px';
-            this.getElement().style.top = y + 'px';
+            // Execute bresenham algorithm. Figure html element is moved along path from starting point to target point
+            Utility.bresenham(thisPositionX, thisPositionY, targetPositionX, targetPositionY, 1, function (x, y) {
 
-            // when target point is reached
-            if(x === targetPositionX && y === targetPositionY){
+                this.getElement().style.left = x + 'px';
+                this.getElement().style.top = y + 'px';
 
-                // We check if new cell has any figures, if yes, we remove them.
-                if(targetCell.getElement().children.length && targetCell.getElement().firstElementChild.classList.contains('figure')){
+                // when target point is reached
+                if (x === targetPositionX && y === targetPositionY) {
 
-                    targetCell.getElement().removeChild(targetCell.getElement().firstChild);
+                    // We check if new cell has any figures, if yes, we remove them.
+                    if (targetCell.getElement().children.length && targetCell.getElement().firstElementChild.classList.contains('figure')) {
+
+                        targetCell.getElement().removeChild(targetCell.getElement().firstChild);
+                    }
+
+                    // figure html element is removed from board html element, and appended to target cell
+                    this.getParentElement().removeChild(this.getElement());
+                    this.setParentElement(targetCell.getElement());
+
+                    targetCell.setFigure(this);
+
+                    // We set figure element top and left to previous values
+                    this.getElement().style.left = '50%';
+                    this.getElement().style.top = '50%';
+
+                    setTimeout(function(){
+
+                        resolve();
+                    }, 250);
                 }
-
-                // figure html element is removed from board html element, and appended to target cell
-                this.getParentElement().removeChild(this.getElement());
-                this.setParentElement(targetCell.getElement());
-
-                targetCell.setFigure(this);
-
-                // We set figure element top and left to previous values
-                this.getElement().style.left = '50%';
-                this.getElement().style.top = '50%';
-            }
-        }.bind(this))
+            }.bind(this))
+        }.bind(this));
     }
 
     /**

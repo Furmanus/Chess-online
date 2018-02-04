@@ -6,6 +6,7 @@ html
         link(rel="stylesheet" type="text/css" href="./../styles/cell.css")
         link(rel="stylesheet" type="text/css" href="./../styles/figure.css")
         link(rel="stylesheet" type="text/css" href="./../styles/panel.css")
+        link(rel="stylesheet" type="text/css" href="./../styles/growler.css")
         title Battle Chess
     body
         div.header
@@ -19,6 +20,6 @@ html
             div.main-side
                 div#panel.panel.scrollbar
                     ul.messages
-        div.footer
+        div.footer.growler-container
         script(src = "/socket.io/socket.io.js")
         script(type="text/javascript" src="scripts/game.bundle.js")

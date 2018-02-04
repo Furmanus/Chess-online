@@ -90,6 +90,20 @@ class View extends Observer{
         playerHeader.textContent = 'offline';
     }
     /**
+     * Enables all click events on page (by removing css class with pointer-events: none on document.body)
+     */
+    enableEventsOnPage(){
+
+        document.body.classList.remove('disabled-events');
+    }
+    /**
+     * Disables all click events on page (by putting css class with pointer-events: none on document.body)
+     */
+    disableEventsOnPage(){
+
+        document.body.classList.add('disabled-events');
+    }
+    /**
      * Method which returns BoardView instance.
      * @returns {BoardView}
      */

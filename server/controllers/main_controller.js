@@ -93,10 +93,11 @@ class MainController extends Observer{
      * Method responsible for storing message from game page in database.
      * @param {string}  gameId
      * @param {string}  message
+     * @param {Object}  moveData
      */
-    storeMessageInDatabase(gameId, message){
+    storeMessageInDatabase(gameId, message, moveData){
 
-        return this.getDatabaseConnection().addMessageToGame(gameId, message);
+        return this.getDatabaseConnection().addMessageToGame(gameId, message, moveData);
     }
     /**
      * Method responsible for getting messages for certain game from database.

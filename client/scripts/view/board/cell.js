@@ -94,6 +94,22 @@ class Cell{
         this[figure] = figureObject;
     }
     /**
+     * Removes figure from certain html board cell.
+     */
+    removeFigure(){
+
+        const figure = this.getFigure();
+
+        if(figure) {
+            try {
+                //sprawdzić czemu tu czasami rzuca dziwnym błędem, że element usuwany nie jest dzieckiem tego noda
+                this[element].removeChild(figure.getElement());
+            }catch (err){
+                console.warn('Unexpected error while removing figure');
+            };
+        }
+    }
+    /**
      * Returns figure from this cell.
      * @return {Figure/null}
      */

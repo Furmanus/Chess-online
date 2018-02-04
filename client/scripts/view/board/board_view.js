@@ -7,6 +7,7 @@ import ColourEnums from "../../../../enums/colours";
 import HighlightEnums from "../../../../enums/highlight";
 import Observer from "../../../../core/observer";
 import EventEnums from "../../../../enums/events";
+import Growler from "../../helper/growler";
 
 // private variables declaration
 const gameBoard = Symbol('gameBoard');
@@ -56,7 +57,7 @@ class BoardView extends Observer{
     /**
      * Attaches event listeners to game board.
      */
-    attachEventListeners(colour){
+    attachEventListeners(){
 
         this.getGameBoard().addEventListener('click', this.clickEventListener);
     }
@@ -82,7 +83,51 @@ class BoardView extends Observer{
         }
     }
     /**
-     * Sets view of every cell from object fetched from server.
+     * Method responsible for replaying certain move.
+     * @param {Object}  moveData            Object with data about previous board state and move to replay
+     * @param {Object}  currentBoardState   Object with serialized data of current board state
+     */
+    replayMove(moveData, currentBoardState){
+
+        try {
+
+            this.notify(EventEnums.BOARD_VIEW_REPLAY_START);
+            this.clearBoard();
+            this.setGameStateFromObject(moveData.boardState);
+            this.detachEventListeners();
+            this.moveFigure({
+                x: moveData.sourceX,
+                y: moveData.sourceY
+            }, {
+                x: moveData.targetX,
+                y: moveData.targetY
+            }).then(function () {
+
+                this.notify(EventEnums.BOARD_VIEW_REPLAY_END);
+                this.clearBoard();
+                this.setGameStateFromObject(currentBoardState);
+                this.attachEventListeners();
+            }.bind(this));
+        }catch(err){
+
+            console.error(err);
+            this.clearBoard();
+            this.setGameStateFromObject(currentBoardState);
+            new Growler('Error occured. Failed to load replay.');
+        }
+    }
+    /**
+     * Method responsible for clearing game board from figures.
+     */
+    clearBoard(){
+
+        this.getCells().forEach(function(item){
+
+            item.removeFigure();
+        });
+    }
+    /**
+     * Sets view of every cell from object.
      * @param {Object} gameState
      */
     setGameStateFromObject(gameState){
@@ -161,7 +206,6 @@ class BoardView extends Observer{
 
         //if chosen cell contains figure, we need to take its parent element. Div element with figure is nested inside div element representing board cell.
         let selectedCell = ev.target.classList.contains('figure') ? ev.target.parentElement : ev.target;
-        //TODO czasami selectCell jest boardem, sprawdzić czemu
         const coordinates = this.convertStringCoordinatesToObject(selectedCell.dataset.coordinates);
         this.notify(EventEnums.BOARD_CLICK, coordinates);
     }
@@ -195,10 +239,6 @@ class BoardView extends Observer{
     highlightSelectedFigure(x, y){
 
         this.highlightCell(x, y, HighlightEnums.RED);
-    }
-    highlightFiguresAbleToMove(figuresCoords){
-        //TODO CZEMU TO NIE DZIALA DO KURWY NĘDZY?
-        //this.highlightArrayOfCells(figuresCoords, HighlightEnums.GREEN);
     }
     /**
      * Highlights array of cells given as argument
@@ -245,15 +285,16 @@ class BoardView extends Observer{
     }
     /**
      * Method initializing animation of moving figure from source cell to target cell.
-     * @param {{x: number, y: number}}  sourceCoords
-     * @param {{x: number, y: number}}  targetCoords
+     * @param   {{x: number, y: number}}  sourceCoords
+     * @param   {{x: number, y: number}}  targetCoords
+     * @returns {Promise}   Promise which resolves after animation is over.
      */
     moveFigure(sourceCoords, targetCoords){
 
         const sourceCell = this.getCell(sourceCoords.x, sourceCoords.y);
         const targetCell = this.getCell(targetCoords.x, targetCoords.y);
 
-        this.getCell(sourceCoords.x, sourceCoords.y).getFigure().moveTo(sourceCell, targetCell);
+        return this.getCell(sourceCoords.x, sourceCoords.y).getFigure().moveTo(sourceCell, targetCell);
     }
 }
 

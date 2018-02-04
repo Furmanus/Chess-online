@@ -25,16 +25,15 @@ class PanelView extends Observer{
     }
     /**
      * Method responsible for displaying message in side panel.
-     * @param {string}  message
+     * @param {HTMLListItemElement}  messageListItemElement
+     * @returns {HTMLElement}
      */
-    addMessage(message){
+    addMessage(messageListItemElement){
 
-        const messageElement = document.createElement('li');
         const listElement = this.getListElement();
         const panelElement = this.getPanelElement();
 
-        messageElement.textContent = message;
-        listElement.appendChild(messageElement);
+        listElement.appendChild(messageListItemElement);
         panelElement.scrollTop = listElement.scrollHeight;
     }
     /**

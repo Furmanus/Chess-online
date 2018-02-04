@@ -65,6 +65,10 @@ class MainController extends Observer{
         this.getSocketClientManager().on(this, EventEnums.SOCKET_TO_CONTROLLER_PLAYER_DISCONNECT, this.onPlayerDisconnect.bind(this));
 
         this.getBoardController().on(this, EventEnums.MOVE_READY_TO_SEND_SERVER, this.onMoveReadyToSendToServer.bind(this));
+        this.getBoardController().on(this, EventEnums.BOARD_VIEW_REPLAY_START, this.onBoardControllerReplayStart.bind(this));
+        this.getBoardController().on(this, EventEnums.BOARD_VIEW_REPLAY_END, this.onBoardControllerReplayEnd.bind(this));
+
+        this.getPanelController().on(this, EventEnums.PANEL_MESSAGE_CLICK, this.onMessageClick.bind(this));
     }
     /**
      * Method responsible for sending to server information about player login to game board page.
@@ -74,6 +78,14 @@ class MainController extends Observer{
         const user = this.getGameModel().getUserName();
 
         this.getSocketClientManager().sendToServerPlayerOnline({user});
+    }
+    /**
+     * Method triggered after one of message controllers notified about message being clicked in panel.
+     * @param {Object}  data
+     */
+    onMessageClick(data){
+
+        this.getBoardController().replayMove(data);
     }
     /**
      * Callback method called after receiving from server information about player login into game board page.
@@ -113,9 +125,10 @@ class MainController extends Observer{
             this.getGameModel().setActivePlayer(data.activePlayer);
             this.getBoardController().buildBoardModel(data.boardData);
             this.getBoardController().setBoardStateInView(data.boardData);
-            storedMessages.forEach(function(message){
 
-                this.getPanelController().addMessageInView(message)
+            storedMessages.forEach(function(messageData){
+
+                this.getPanelController().addMessageInView(messageData.message, messageData.moveData, true);
             }.bind(this));
             this.getSocketClientManager().sendToServerPlayerOnline({
 
@@ -194,6 +207,14 @@ class MainController extends Observer{
         let isActivePlayer;
         let message;
         let captureMessage;
+        let movementData = {
+
+            boardState: data.boardData,
+            sourceX: data.sourceX,
+            sourceY: data.sourceY,
+            targetX: data.targetX,
+            targetY: data.targetY
+        };
         const moveModelData = this.getBoardController().moveFigure({
 
             x: data.sourceX,
@@ -211,11 +232,11 @@ class MainController extends Observer{
 
         if(isActivePlayer){
 
-            this.getPanelController().addSavedMessageInView(gameId, message);
+            this.getPanelController().addMessageInView(message, movementData, true);
             this.getBoardController().listenToViewEvents();
         }else{
 
-            this.getPanelController().addMessageInView(message);
+            this.getPanelController().addSavedMessageInView(gameId, message, movementData, true);
             this.getBoardController().detachEventsInView();
         }
 
@@ -230,12 +251,26 @@ class MainController extends Observer{
 
             if(isActivePlayer) {
 
-                this.getPanelController().addSavedMessageInView(gameId, captureMessage);
+                this.getPanelController().addMessageInView(gameId, captureMessage);
             }else{
 
                 this.getPanelController().addMessageInView(captureMessage);
             }
         }
+    }
+    /**
+     * Method triggered when board controller notifies main controller that replay of move just started.
+     */
+    onBoardControllerReplayStart(){
+
+        this.getMainView().disableEventsOnPage();
+    }
+    /**
+     * Method triggered when board controller notifies main controller that replay of move just ended.
+     */
+    onBoardControllerReplayEnd(){
+
+        this.getMainView().enableEventsOnPage();
     }
     /**
      * Returns board controller.
