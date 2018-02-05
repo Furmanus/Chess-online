@@ -27,9 +27,16 @@ export default class BoardHelper{
         boardState[sourceStringCoordinate].figure = boardState[targetStringCoordinate].figure;
         boardState[sourceStringCoordinate].hasMoved = boardState[targetStringCoordinate].hasMoved;
 
-        boardState[targetStringCoordinate].colour = null;
-        boardState[targetStringCoordinate].figure = null;
-        boardState[targetStringCoordinate].hasMoved = null;
+        if(moveData.capturedFigure){
+
+            boardState[targetStringCoordinate].colour = moveData.capturedFigureColor;
+            boardState[targetStringCoordinate].figure = moveData.capturedFigure;
+        }else {
+
+            boardState[targetStringCoordinate].colour = null;
+            boardState[targetStringCoordinate].figure = null;
+            boardState[targetStringCoordinate].hasMoved = null;
+        }
 
         return {
 

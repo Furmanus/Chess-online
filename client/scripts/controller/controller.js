@@ -230,6 +230,14 @@ class MainController extends Observer{
 
         isActivePlayer = data.activePlayer === this.getGameModel().getPlayerColour();
 
+        if(moveModelData.capturedFigure){
+
+            Object.assign(movementData, {
+                capturedFigure: moveModelData.capturedFigure,
+                capturedFigureColor: data.activePlayer
+            });
+        }
+
         if(isActivePlayer){
 
             this.getPanelController().addMessageInView(message, movementData, true);
