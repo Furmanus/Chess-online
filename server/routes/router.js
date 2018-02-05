@@ -7,6 +7,7 @@ const EventEnums = require('./../../enums/events');
 const ColourEnums = require('./../../enums/colours');
 
 const bcrypt = require('bcrypt');
+const xssFilters = require('xss-filters');
 
 const mainController = Symbol();
 const socketManager = Symbol();
@@ -230,7 +231,7 @@ class Router{
     dashboardPage(req, res){
 
         req.session.touch(req.sessionID);
-        res.render('dashboard', {user: req.query.user});
+        res.render('dashboard', {user: xssFilters.inHTMLData(req.query.user)});
     }
     /**
      * Callback function for '/game' GET route. Renders page with game board.
@@ -260,8 +261,8 @@ class Router{
                 req.session.touch(req.sessionID);
                 res.render('board', {
 
-                    whitePlayer: examinedGameObject.white.toString(),
-                    blackPlayer: examinedGameObject.black ? examinedGameObject.black.toString() : 'waiting for player to join...'
+                    whitePlayer: xssFilters.inHTMLData(examinedGameObject.white.toString()),
+                    blackPlayer: examinedGameObject.black ? xssFilters.inHTMLData(examinedGameObject.black.toString()) : 'waiting for player to join...'
                 });
             }else{
                 //TODO zamienić na render strony 403 forbidden access
