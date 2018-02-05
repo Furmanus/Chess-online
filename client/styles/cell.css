@@ -31,13 +31,13 @@
 }
 .red_border{
 
-    box-shadow: 0 0 0 3px red inset;
+    box-shadow: 0 0 0 2px red inset;
 }
 .blue_border{
 
-    box-shadow: 0 0 0 3px blue inset;
+    box-shadow: 0 0 0 2px blue inset;
 }
 .green_border{
 
-    box-shadow: 0 0 0 3px green inset;
+    box-shadow: 0 0 0 2px green inset;
 }
