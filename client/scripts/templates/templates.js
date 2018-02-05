@@ -2,6 +2,8 @@
  * @author Lukasz Lach
  */
 
+import xssFilters from "xss-filters";
+
 class Templates{
 
     static getDashboardGameListElement(data, user){
@@ -11,8 +13,8 @@ class Templates{
         return (
             `<a href=${href}>` +
                 '<div class="dashboard-list-item">' +
-                    `<p>White: ${data.white}</p>` +
-                    `<p>${data.black ? 'Black: ' + data.black : 'Waiting for other player...'}</p>` +
+                    `<p>White: ${xssFilters.inHTMLData(data.white)}</p>` +
+                    `<p>${data.black ? 'Black: ' + xssFilters.inHTMLData(data.black) : 'Waiting for other player...'}</p>` +
                 '</div>' +
             '</a>'
         )
@@ -21,7 +23,7 @@ class Templates{
 
         return (
             '<div class="dashboard-slider-item">' +
-                `<p>Opponent: ${data.white}</p>` +
+                `<p>Opponent: ${xssFilters.inHTMLData(data.white)}</p>` +
                 `<p><a href="#">${'Click to join now'}</a></p>` +
                 `<p>Id: ${data._id}</p>` +
             '</div>'
