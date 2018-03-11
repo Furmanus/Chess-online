@@ -1,3 +1,5 @@
+https://battlechess.herokuapp.com/
+
 Early beta version of online chess game. Fully playable but lacks many features I originally wanted to implement.
 
 Disclaimer: game uses free versions of mongolab database and heroku hosting. There might be downtimes. If you can't play, please comeback later.
